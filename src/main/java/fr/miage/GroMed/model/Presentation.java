@@ -21,8 +21,6 @@ public class Presentation {
     @Column
     private int cip13;
 
-    @Column
-    private Long cip;
 
     @Column
     private String libelle;

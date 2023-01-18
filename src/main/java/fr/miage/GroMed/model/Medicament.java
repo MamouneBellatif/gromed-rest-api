@@ -51,20 +51,20 @@ public class Medicament {
     @Column
     private String conditionsPrescription;
 
-    @Column
-    @OneToMany
-    private List<Presentation> presentationsList;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
+    private List<Presentation> presentationList;
 
-    @Column
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
     private List<GroupeGenerique>  groupeGeneriqueList;
 
-    @Column
-    @OneToMany
-    private List<Composant> composantList;
+    @OneToMany(mappedBy = "medicaments",cascade = CascadeType.ALL)
+    @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
+    private List<ComposantSubtance> composantList;
 
-    @Column
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
     private List<ConditionPrescription> conditionPrescriptionList;
 
 
