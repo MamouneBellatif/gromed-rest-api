@@ -1,6 +1,5 @@
 package fr.miage.gromed.utils;
 
-import fr.miage.gromed.restockfaker.RestockFaker;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
@@ -18,37 +17,7 @@ public class MedicalDataParser {
     Map<SchemaNameSpace, String[]> dbSchema = new HashMap<>();
     Map<SchemaNameSpace, String> fileContent = new HashMap<>();
 
-    private String medicamentString;
-
-    private void initFileContent(SchemaNameSpace fileType, String filePath){
-        try {
-            var file = new FileInputStream(new File(filePath));
-            fileContent.put(fileType,FileHelper.readFromInputStream(file));
-        }catch (Exception e) {
-            log.warning("Fichier de présentation non trouvé");
-        }
-    }
-
-//    public void
-    public MedicalDataParser() {
-
-        dbSchema.put(SchemaNameSpace.MEDICAMENT, new String[]{
-                "CIS",
-                "denomination",
-                "forme_pharmaceutique",
-                "voies_administration",
-                "statut_admin_AMM",
-                "type_procedure_AMM",
-                "etat_commercialisation",
-                "date_AMM",
-                "statut_BDM",
-                "numero_autorisation_europeenne",
-                "titulaires",
-                "surveillance_renforcee"
-        });
-
-
-    }
+    Map<SchemaNameSpace, Boolean> isInit = new HashMap<>();
 
     public void initComposants(String composantPath){
 
@@ -66,7 +35,8 @@ public class MedicalDataParser {
     }
 
     public void initPresentation(String presentationPath){
-        dbSchema.put(SchemaNameSpace.PRESENTATION, new String[] {
+        SchemaNameSpace ns = SchemaNameSpace.PRESENTATION;
+        dbSchema.put(ns, new String[] {
                 "CIS",
                 "CIP7",
                 "libelle",
@@ -77,11 +47,12 @@ public class MedicalDataParser {
                 "agrement_collectivites",
                 "taux_remboursement",
                 "prix_sans_honoraires",
-                "prix_avec_honoraires",
-                "honoraires",
+//                "prix_avec_honoraires",
+//                "honoraires",
                 "indications_remboursement"
         });
-        initFileContent(SchemaNameSpace.PRESENTATION, presentationPath);
+        initFileContent(ns, presentationPath);
+        isInit.put(ns,true);
     }
 
     public void initMedicament(String medicamentPath) {
@@ -100,33 +71,45 @@ public class MedicalDataParser {
                 "surveillance_renforcee"
         });
         initFileContent(SchemaNameSpace.MEDICAMENT, medicamentPath);
+        isInit.put(SchemaNameSpace.MEDICAMENT,true);
     }
 
-    public Map<String, Object> parseLine(SchemaNameSpace namespace, String line) {
+    public List<DataWrapper> parsePresentation(){
+        return this.parse(SchemaNameSpace.PRESENTATION);
+    }
+
+    private void initFileContent(SchemaNameSpace fileType, String filePath){
+        try {
+            var file = new FileInputStream(new File(filePath));
+            fileContent.put(fileType,FileHelper.readFromInputStream(file));
+        }catch (Exception e) {
+            log.warning("Fichier de présentation non trouvé");
+        }
+    }
+    private DataWrapper parseLine(SchemaNameSpace namespace, String line) {
         String[] values = line.split(SEPARATOR);
         String[] schema = dbSchema.get(namespace);
         Map<String, Object> data = new LinkedHashMap<>();
-        for (int i = 0; i < schema.length; i++) {
+        for (int i = 0; i < schema.length && i < values.length; i++) {
             String key = schema[i];
             String value = values[i];
             Object parsedIntegerValue = integerParser(value);
-            data.put(key, booleanParser(value));
+            data.put(key, (i==0)?parsedIntegerValue:booleanParser(value));
         }
-        return data;
+        return new DataWrapper(data);
     }
 
-    public ArrayList<Map<String, Object>> parseTxt(SchemaNameSpace namespace){
-        String[] lines = this.fileContent.get(namespace).split(NEWLINE);
-        ArrayList<Map<String, Object>> result = new ArrayList<>();
-        Arrays.stream(lines).forEach(line ->{
-            result.add(parseLine(namespace, this.trimEnd(line)));
-        });
-        return result;
+    public ArrayList<DataWrapper> parseMedicament(){
+        return this.parse(SchemaNameSpace.MEDICAMENT);
     }
-    public ArrayList<Map<String, Object>> parseMedicamentTest(SchemaNameSpace namespace){
-        String[] dataLines = medicamentString.split(NEWLINE);
-        ArrayList<Map<String, Object>> result = new ArrayList<>();
-        Arrays.stream(dataLines).forEach(line ->{
+
+    public ArrayList<DataWrapper> parse(SchemaNameSpace namespace){
+        if (!(isInit.containsKey(namespace) && isInit.get(namespace))){
+            return null;
+        }
+        String[] lines = this.fileContent.get(namespace).split(NEWLINE);
+        ArrayList<DataWrapper> result = new ArrayList<>();
+        Arrays.stream(lines).forEach(line ->{
             result.add(parseLine(namespace, this.trimEnd(line)));
         });
         return result;
