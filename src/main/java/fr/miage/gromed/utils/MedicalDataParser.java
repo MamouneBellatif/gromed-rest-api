@@ -115,7 +115,7 @@ public class MedicalDataParser {
         return data;
     }
 
-    public ArrayList<Map<String, Object>> parse(SchemaNameSpace namespace){
+    public ArrayList<Map<String, Object>> parseTxt(SchemaNameSpace namespace){
         String[] lines = this.fileContent.get(namespace).split(NEWLINE);
         ArrayList<Map<String, Object>> result = new ArrayList<>();
         Arrays.stream(lines).forEach(line ->{

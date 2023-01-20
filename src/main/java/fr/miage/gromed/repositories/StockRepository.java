@@ -1,6 +1,6 @@
 package fr.miage.gromed.repositories;
 
-import fr.miage.gromed.model.medicament.Stock;
+import fr.miage.gromed.model.Stock;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

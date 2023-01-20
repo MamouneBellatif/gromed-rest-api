@@ -1,8 +1,7 @@
 package fr.miage.gromed.restockfaker;
 
-import fr.miage.gromed.model.medicament.Stock;
+import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.repositories.StockRepository;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

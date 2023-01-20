@@ -2,7 +2,7 @@ package fr.miage.gromed.service;
 
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.PanierItem;
-import fr.miage.gromed.model.medicament.Stock;
+import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.repositories.PanierRepository;
 import fr.miage.gromed.repositories.StockRepository;
 import jakarta.persistence.LockModeType;
@@ -42,7 +42,7 @@ public class StockService {
         }
         Stock stock = stockOpt.get();
         if (stock.getQuantiteStockLogique() < quantity) {
-            throw new IllegalStateException("Not enough stock available");
+            throw new RollbackException("Stock indisponible");
         }
         stock.setQuantiteStockLogique(stock.getQuantiteStockLogique() - quantity);
         Optional<Panier> panierOpt = panierRepository.findById(panierId);

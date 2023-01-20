@@ -18,6 +18,4 @@ public class CommandeType {
     @JoinColumn(name="panier_id_fk", referencedColumnName = "panier_id")
     private Panier panier;
 
-
-
 }

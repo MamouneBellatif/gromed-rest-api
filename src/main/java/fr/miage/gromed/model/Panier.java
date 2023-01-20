@@ -1,6 +1,5 @@
 package fr.miage.gromed.model;
 
-import fr.miage.gromed.model.medicament.Utilisateur;
 import jakarta.persistence.*;
 import lombok.Data;
 

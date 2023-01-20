@@ -15,8 +15,6 @@ public class GroupeGenerique {
     @Column(name = "groupe_generique_id", nullable = false)
     private Long id;
 
-    //Dans le modèle, le type generique est un heritage de medicament
-    // mais pour le code on choisit d'éviter l'héritage et on ajoute un attribut discriminant le type de médicament
     @Column
     @Enumerated(EnumType.STRING)
     private TypeGenerique typeGeneriqueEnum;

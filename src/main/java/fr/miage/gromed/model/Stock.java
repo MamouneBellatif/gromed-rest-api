@@ -1,6 +1,8 @@
-package fr.miage.gromed.model.medicament;
+package fr.miage.gromed.model;
 
 //import fr.miage.gromed.model.listeners.StockListener;
+import fr.miage.gromed.model.medicament.Presentation;
+import fr.miage.gromed.service.listeners.StockListener;
 import jakarta.persistence.*;
 import jdk.jfr.Enabled;
 import lombok.Getter;
@@ -9,8 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-//@Embeddable
-//@EntityListeners(StockListener.class)
+@EntityListeners(StockListener.class)
 public class Stock {
 
     @Id

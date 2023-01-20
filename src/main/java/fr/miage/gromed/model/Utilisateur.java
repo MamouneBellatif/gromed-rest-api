@@ -1,4 +1,4 @@
-package fr.miage.gromed.model.medicament;
+package fr.miage.gromed.model;
 
 import fr.miage.gromed.model.Etablissement;
 import fr.miage.gromed.model.enums.PerimetreUtilisateur;
