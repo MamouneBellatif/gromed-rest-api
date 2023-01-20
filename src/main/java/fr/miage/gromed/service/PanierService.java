@@ -1,0 +1,35 @@
+package fr.miage.gromed.service;
+
+import fr.miage.gromed.model.Panier;
+import fr.miage.gromed.repositories.PanierElementRepository;
+import fr.miage.gromed.repositories.PanierRepository;
+import jakarta.persistence.LockModeType;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PanierService {
+
+    @Autowired
+    private PanierRepository panierRepository;
+
+    @Autowired
+    private StockService stockService;
+
+    @Autowired
+    private PanierElementRepository panierElementRepository;
+
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    public void updatePanier(long productId, int quantity) {
+        Panier panier = panierRepository.findById(productId).get();
+        panier.getItems().forEach(panierItem -> {
+//            panierItem.getPresentation().
+            stockService.updateStock(panierItem.getPresentation().getId(), panierItem.getQuantite());
+        panierItem.setQuantite(panierItem.getQuantite() + quantity);
+        });
+        panierRepository.save(panier);
+    }
+}
