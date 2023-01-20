@@ -34,6 +34,9 @@ public class Medicament {
     private String typeProcedureAMM;
 
     @Column
+    private boolean surveillanceRenforcee;
+
+    @Column
     private String etatCommercialisation;
 
     @Column
@@ -50,6 +53,9 @@ public class Medicament {
 
     @Column
     private String conditionsPrescription;
+
+    @Column
+    private String informationImportantesHtmlAnchor;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")

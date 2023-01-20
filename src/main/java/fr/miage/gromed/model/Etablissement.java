@@ -14,16 +14,21 @@ public class Etablissement {
     @Column(name = "etablissement_id", nullable = false)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String nom;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String adresse;
 
-    @Column( unique = true)
+    @Column
     private String telephone;
+    
+    @Column
+    private String raisonSociale;
 
     @Column
-    private String type;
+    private String numSiret;
+    @Column
+    private String categorie;
 
 }

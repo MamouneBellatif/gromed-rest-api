@@ -1,4 +1,4 @@
-package fr.miage.gromed.model.listeners;
+package fr.miage.gromed.service.listeners;
 
 import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.model.medicament.Stock;
@@ -9,8 +9,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class StockListener {
 
     @Autowired

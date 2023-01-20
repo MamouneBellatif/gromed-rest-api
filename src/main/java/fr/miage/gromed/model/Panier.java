@@ -20,7 +20,8 @@ public class Panier {
     private List<PanierItem> items;
 
     //date with hour and minute
-    @Temporal(TemporalType.TIMESTAMP)
+//    @Temporal(TemporalType.TIMESTAMP)
+    @Column
     private Date dateCreation;
 
     @Column
@@ -30,10 +31,11 @@ public class Panier {
     @JoinColumn(name = "user_id_fk", referencedColumnName = "user_id")
     private Utilisateur client;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date datePaiement;
+//    @Temporal(TemporalType.TIMESTAMP)
+@Column
+private Date datePaiement;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column
     private Date dateLivraison;
 
     @Column

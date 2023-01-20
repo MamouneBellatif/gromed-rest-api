@@ -1,6 +1,6 @@
 package fr.miage.gromed.model.medicament;
 
-import fr.miage.gromed.model.listeners.StockListener;
+//import fr.miage.gromed.model.listeners.StockListener;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-@EntityListeners(StockListener.class)
+//@EntityListeners(StockListener.class)
 public class Presentation {
 
     @Id
@@ -31,7 +31,7 @@ public class Presentation {
     @Column
     private double honoraire;
 
-    @Embedded
+    @OneToOne
     private Stock stock;
 
 

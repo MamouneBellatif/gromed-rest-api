@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface MedicamentRepository extends JpaRepository<Medicament, Long> {
-    List<Medicament> findByComposantListLibe(List<ComposantSubtance> composantList);
-    List<Medicament> findByDenomination(String denomination);
+//    List<Medicament> findByComposantListLibe(List<ComposantSubtance> composantList);
+//    List<Medicament> findByDenomination(String denomination);
 }
