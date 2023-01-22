@@ -1,0 +1,177 @@
+@startuml
+
+/' diagram meta data start
+config=StructureConfiguration;
+{
+  "projectClassification": {
+    "searchMode": "OpenProject", // OpenProject, AllProjects
+    "includedProjects": "",
+    "pathEndKeywords": "*.impl",
+    "isClientPath": "",
+    "isClientName": "",
+    "isTestPath": "",
+    "isTestName": "",
+    "isMappingPath": "",
+    "isMappingName": "",
+    "isDataAccessPath": "",
+    "isDataAccessName": "",
+    "isDataStructurePath": "",
+    "isDataStructureName": "",
+    "isInterfaceStructuresPath": "",
+    "isInterfaceStructuresName": "",
+    "isEntryPointPath": "",
+    "isEntryPointName": "",
+    "treatFinalFieldsAsMandatory": false
+  },
+  "graphRestriction": {
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "removeByInheritance": "", // inheritance/annotation based filtering is done in a second step
+    "removeByAnnotation": "",
+    "removeByClassPackage": "", // cleanup the graph after inheritance/annotation based filtering is done
+    "removeByClassName": "",
+    "cutMappings": false,
+    "cutEnum": true,
+    "cutTests": true,
+    "cutClient": true,
+    "cutDataAccess": true,
+    "cutInterfaceStructures": true,
+    "cutDataStructures": true,
+    "cutGetterAndSetter": true,
+    "cutConstructors": true
+  },
+  "graphTraversal": {
+    "forwardDepth": 3,
+    "backwardDepth": 3,
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "hideMappings": false,
+    "hideDataStructures": false,
+    "hidePrivateMethods": true,
+    "hideInterfaceCalls": true, // indirection: implementation -> interface (is hidden) -> implementation
+    "onlyShowApplicationEntryPoints": false, // root node is included
+    "useMethodCallsForStructureDiagram": "ForwardOnly" // ForwardOnly, BothDirections, No
+  },
+  "details": {
+    "aggregation": "GroupByClass", // ByClass, GroupByClass, None
+    "showClassGenericTypes": true,
+    "showMethods": true,
+    "showMethodParameterNames": true,
+    "showMethodParameterTypes": true,
+    "showMethodReturnType": true,
+    "showPackageLevels": 2,
+    "showDetailedClassStructure": true
+  },
+  "rootClass": "fr.miage.gromed.controller.PopulateController",
+  "extensionCallbackMethod": "" // qualified.class.name#methodName - signature: public static String method(String)
+}
+diagram meta data end '/
+
+
+
+digraph g {
+    rankdir="TB"
+    splines=polyline
+    
+
+'nodes 
+subgraph cluster_103888355 { 
+   	label=miage
+	labeljust=l
+	fillcolor="#ececec"
+	style=filled
+   
+   subgraph cluster_1019194157 { 
+   	label=gromed
+	labeljust=l
+	fillcolor="#d8d8d8"
+	style=filled
+   
+   FileHelper931408260[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)FileHelper</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >- readFromInputStream(inputStream: InputStream): String</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+MedicalDataParser314900424[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)MedicalDataParser</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >#   dbSchema: Map&lt;SchemaNameSpace, String[]&gt; [0..*]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   fileContent: Map&lt;SchemaNameSpace, String&gt; [0..*]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   isInit: Map&lt;SchemaNameSpace, Boolean&gt; [0..*]</TD></TR>
+<TR><TD ALIGN="LEFT" >#   log: Logger [0..1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >- booleanParser(value: String): Object</TD></TR>
+<TR><TD ALIGN="LEFT" >+ doubleParser(value: String): Object</TD></TR>
+<TR><TD ALIGN="LEFT" >+ initComposants(composantPath: String)</TD></TR>
+<TR><TD ALIGN="LEFT" >- initFileContent(fileType: SchemaNameSpace, filePath: String)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ initMedicament(medicamentPath: String)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ initPresentation(presentationPath: String)</TD></TR>
+<TR><TD ALIGN="LEFT" >- integerParser(value: String): Object</TD></TR>
+<TR><TD ALIGN="LEFT" >+ parse(namespace: SchemaNameSpace): ArrayList&lt;DataWrapper&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >- parseLine(namespace: SchemaNameSpace, line: String): DataWrapper</TD></TR>
+<TR><TD ALIGN="LEFT" >+ parseMedicament(): ArrayList&lt;DataWrapper&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ parsePresentation(): List&lt;DataWrapper&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >- trimEnd(value: String): String</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+PopulateController535171189[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)PopulateController</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   populateService: PopulateService [1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ populate(): String</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+PopulateService127529084[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)PopulateService</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   medicalDataParser: MedicalDataParser [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   medicamentRepository: MedicamentRepository [1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ populate()</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+} 
+} 
+
+'edges    
+MedicalDataParser314900424 -> FileHelper931408260[label="initFileContent() -> readFromInputStream()"];
+PopulateController535171189 -> PopulateService127529084[label="populateService
+[1]"];
+PopulateService127529084 -> MedicalDataParser314900424[label="medicalDataParser
+[1]"];
+    
+}
+@enduml

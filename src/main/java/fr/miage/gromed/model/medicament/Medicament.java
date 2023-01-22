@@ -4,11 +4,18 @@ import jakarta.persistence.*;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Entity
+@Table(name = "Medicament", indexes = {
+        @Index(name = "idx_medicament_denomination", columnList = "denomination"),
+        @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS", unique = true)
+})
+
 @Getter
 @Setter
 public class Medicament {
@@ -21,7 +28,7 @@ public class Medicament {
     @Column(nullable= false, unique = true)
     private int codeCIS;
 
-    @Column(unique=true)
+    @Column
     private String denomination;
 
     @Column
@@ -78,5 +85,16 @@ public class Medicament {
     @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
     private List<MedicamentAvis> medicamentAvisList;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Medicament that = (Medicament) o;
+        return id != null && Objects.equals(id, that.id);
+    }
 
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

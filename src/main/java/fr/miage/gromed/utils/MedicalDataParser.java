@@ -20,7 +20,6 @@ public class MedicalDataParser {
     Map<SchemaNameSpace, Boolean> isInit = new HashMap<>();
 
     public void initComposants(String composantPath){
-
         dbSchema.put(SchemaNameSpace.COMPOSANT, new String[] {
                 "CIS",
                 "designation_element_pharmaceutique",
@@ -32,6 +31,7 @@ public class MedicalDataParser {
                 "numero_liaison_sa_ft"
         });
         initFileContent(SchemaNameSpace.COMPOSANT, composantPath);
+        isInit.put(SchemaNameSpace.COMPOSANT, true);
     }
 
     public void initPresentation(String presentationPath){
