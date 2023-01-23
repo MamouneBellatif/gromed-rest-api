@@ -10,10 +10,28 @@ public class PopulateController {
 
     @Autowired
     private PopulateService populateService;
-    @GetMapping("/populate")
+    @GetMapping("/populateMedicament")
      public String populate() {
         populateService.populateMedicament();
-        return "Data has been populated";
+        return "medicaments has been populated";
+    }
+
+    @GetMapping("/populatePres")
+    public String populatePres(){
+        populateService.populatePresentation();
+        return "pres populate";
+    }
+
+    @GetMapping("/populateComp")
+    public String populateSubs(){
+        populateService.populateComposant();
+        return "comp populate";
+    }
+
+    @GetMapping("/populateAvis")
+    public String populateAvis(){
+        populateService.populateAvis();
+        return "avis populate";
     }
 
 }

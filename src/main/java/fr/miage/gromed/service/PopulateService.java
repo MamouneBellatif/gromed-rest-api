@@ -52,9 +52,10 @@ public class PopulateService {
             Medicament medicament = Medicament.builder().build();
             medicamentLaboMap.put(medicament.getCodeCIS(), data.data.get("titulaires"));
 
-            System.out.println("populateMedicament: "+medicament);
+            System.out.println("populateMedicament: "+medicament.toString());
             System.out.println("###################");
             medicamentRepository.save(medicament);
+            medicament = null;
         });
     }
         //use medicalDataParser to parse CIS_CIP_bdpm.txt and save the result in the database accordingly to the model using medicamentRepository CIS as foreign key
@@ -90,7 +91,7 @@ public class PopulateService {
             return Stock.builder().build();
      }
 
-     private void populateComposant() {
+     public void populateComposant() {
          medicalDataParser.initComposants("src/main/resources/data/CIS_COMPO_bdpm.txt");
          List<DataWrapper> list = medicalDataParser.parseComposant();
          list.forEach(data -> {

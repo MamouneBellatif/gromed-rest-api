@@ -114,5 +114,8 @@ public class Medicament {
         return getClass().hashCode();
     }
 
-
+    @Override
+    public String toString(){
+        return "medoc CIS "+this.codeCIS+" id: "+this.id+" denom "+this.denomination;
+    }
 }

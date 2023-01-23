@@ -174,7 +174,10 @@ public class MedicalDataParser {
              dateFormat = new SimpleDateFormat("yyyyMMdd");
          }
         try {
-            return dateFormat.parse(dateString);
+            if(dateString!=null) {
+                return dateFormat.parse(dateString);
+            }
+            return null;
         } catch (ParseException e) {
             return null;
         }
