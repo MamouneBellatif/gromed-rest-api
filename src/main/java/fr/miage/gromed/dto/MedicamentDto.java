@@ -1,5 +1,6 @@
-package fr.miage.gromed.model.medicament;
+package fr.miage.gromed.dto;
 
+import fr.miage.gromed.model.medicament.Medicament;
 import lombok.Data;
 
 import java.io.Serializable;

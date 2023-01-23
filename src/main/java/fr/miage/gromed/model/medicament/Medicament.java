@@ -1,25 +1,26 @@
 package fr.miage.gromed.model.medicament;
 
+import fr.miage.gromed.model.Etablissement;
 import jakarta.persistence.*;
-
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.Hibernate;
 
-import java.util.List;
+import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 
 
 @Entity
-@Table(name = "Medicament", indexes = {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(indexes = {
         @Index(name = "idx_medicament_denomination", columnList = "denomination"),
         @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS", unique = true)
 })
-
-@Getter
-@Setter
 public class Medicament {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "medicament_id", nullable = false)
@@ -41,13 +42,13 @@ public class Medicament {
     private String typeProcedureAMM;
 
     @Column
-    private boolean surveillanceRenforcee;
+    private Boolean isSurveillanceRenforcee;
 
     @Column
     private String etatCommercialisation;
 
-    @Column
-    private String dateAMM;
+    @Temporal(TemporalType.DATE)
+    private Date dateAMM;
 
     @Column
     private String statutBDM;
@@ -56,7 +57,7 @@ public class Medicament {
     private String statutAdministratif;
 
     @Column
-    private String numeroAutorisation;
+    private String numeroAutorisationEuro;
 
     @Column
     private String conditionsPrescription;
@@ -64,27 +65,42 @@ public class Medicament {
     @Column
     private String informationImportantesHtmlAnchor;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
-    private List<Presentation> presentationList;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="etablissement_id_fk", referencedColumnName = "etablissement_id")
+    private Etablissement laboratoire;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
-    private List<GroupeGenerique>  groupeGeneriqueList;
+    private Set<Presentation> presentationList;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
+    private Set<GroupeGenerique>  groupeGeneriqueList;
 
 //    @OneToMany(mappedBy = "medicaments",cascade = CascadeType.ALL)
     @OneToMany( cascade  = CascadeType.ALL)
     @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
-    private List<ComposantSubtance> composantList;
+    private Set<ComposantSubtance> composantList;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
-    private List<ConditionPrescription> conditionPrescriptionList;
+    private Set<ConditionPrescription> conditionPrescriptionList;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
-    private List<MedicamentAvis> medicamentAvisList;
+    private Set<MedicamentAvis> medicamentAvisList;
 
+    public void addPresentation(Presentation presentation){
+        this.presentationList.add(presentation);
+    }
+
+    public void addAvis(MedicamentAvis avis){
+        this.medicamentAvisList.add(avis);
+    }
+
+    public void addComposant(ComposantSubtance composantSubtance) {
+        this.composantList.add(composantSubtance);
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -97,4 +113,6 @@ public class Medicament {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+
 }

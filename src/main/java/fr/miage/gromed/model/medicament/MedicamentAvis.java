@@ -4,14 +4,16 @@ package fr.miage.gromed.model.medicament;
 import fr.miage.gromed.model.enums.TypeAvis;
 import fr.miage.gromed.model.enums.ValeurAvis;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.sql.Date;
+import java.util.Date;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MedicamentAvis {
 
 
@@ -21,12 +23,12 @@ public class MedicamentAvis {
     private Long id;
 
     @Column
-    private String codeHAS;
+    private String codeDossier;
 
     @Column
     private String motif;
 
-    @Column
+    @Temporal(TemporalType.DATE)
     private Date dateAvis;
 
     @Enumerated(EnumType.STRING)

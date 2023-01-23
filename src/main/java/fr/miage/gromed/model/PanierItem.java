@@ -6,6 +6,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Entity
 @Setter
 @Getter
@@ -25,6 +28,8 @@ public class PanierItem {
     @OneToOne
     @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id")
     private Presentation presentation;
+
+    private int delivree;
 
     public PanierItem(Presentation presentation, int quantity) {
         this.presentation = presentation;

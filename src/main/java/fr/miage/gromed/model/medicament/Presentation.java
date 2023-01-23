@@ -4,13 +4,17 @@ package fr.miage.gromed.model.medicament;
 import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.service.listeners.StockListener;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.Date;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @EntityListeners(StockListener.class)
+@NoArgsConstructor
 public class Presentation {
 
     @Id
@@ -19,26 +23,42 @@ public class Presentation {
     private Long id;
 
     @Column
-    private int cip13;
-
+    private int codeCIP;
 
     @Column
     private String libelle;
 
     @Column
-    private double prix;
+    private double prixDeBase;
 
     @Column
-    private double honoraire;
+    private double honoraireRemboursement;
 
-    @OneToOne
+    @Temporal(TemporalType.DATE)
+    private Date dateDeclaration;
+
+    @Column
+    private String etatCommercialisation;
+
+    @Column
+    private String statutAdmin;
+
+//    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id", unique = true)
+    @OneToOne(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true)
     private Stock stock;
+
+    //Si c'est faux un utilisateur de type etablissement hopital
+    //ne peut pas acheter ce produit
+    @Column
+    private Boolean isAgrement;
+
+    @Column
+    private String tauxRemboursement;
 
     public static final int SEUIL = 100;
 
-    @Version
-    @Column(name = "transactional_version", columnDefinition = "integer DEFAULT 0", nullable = false)
-    private int version;
+
 
 
 }

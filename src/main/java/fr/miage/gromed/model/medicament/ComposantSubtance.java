@@ -2,16 +2,17 @@ package fr.miage.gromed.model.medicament;
 
 import fr.miage.gromed.model.enums.NatureComposant;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Setter
+@Builder
+@AllArgsConstructor
 public class ComposantSubtance {
 
 
@@ -20,14 +21,16 @@ public class ComposantSubtance {
     @Column(name = "composant_id", nullable = false)
     private Long id;
 
-    @ElementCollection
-    private  List<String>  denominationList;
+    @Column
+    private int codeSubstance;
+
+//    @ElementCollection
+//    private Set<String> denominationList;
+    @Column
+    private String denomination;
 
     @Column
     private String designationElementPharmaceutique;
-
-    @Column(nullable = false, unique = true)
-    private String code;
 
     @Column
     @Enumerated(EnumType.STRING)

@@ -3,7 +3,22 @@ package fr.miage.gromed.utils;
 public enum SchemaNameSpace {
     MEDICAMENT("médicaments"),
     PRESENTATION("présentation"),
-    COMPOSANT("composant");
+    COMPOSANT("composant"),
+
+    INFOS("infos"),
+
+    GROUPE_GENERIQUE("groupe_générique"),
+
+    AVIS_ASMR("avis_asmr"),
+
+    AVIS_SMR("avis_smr"),
+    CONDITION_PRESCRIPTION("conditions");
+
+
+
+
+
+
 
     private String tableName;
     SchemaNameSpace(String tableName) {

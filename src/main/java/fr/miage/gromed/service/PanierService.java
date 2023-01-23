@@ -22,7 +22,7 @@ public class PanierService {
     private PanierElementRepository panierElementRepository;
 
     @Transactional
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Lock(LockModeType.OPTIMISTIC)
     public void updatePanier(long productId, int quantity) {
         Panier panier = panierRepository.findById(productId).get();
         panier.getItems().forEach(panierItem -> {

@@ -30,9 +30,9 @@ public class Panier {
     @JoinColumn(name = "user_id_fk", referencedColumnName = "user_id")
     private Utilisateur client;
 
-//    @Temporal(TemporalType.TIMESTAMP)
-@Column
-private Date datePaiement;
+    //    @Temporal(TemporalType.TIMESTAMP)
+    @Column
+    private Date datePaiement;
 
     @Column
     private Date dateLivraison;

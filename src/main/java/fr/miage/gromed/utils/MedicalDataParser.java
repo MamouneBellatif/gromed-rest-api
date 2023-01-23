@@ -4,6 +4,9 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -46,14 +49,76 @@ public class MedicalDataParser {
                 "CIP13",
                 "agrement_collectivites",
                 "taux_remboursement",
-                "prix_sans_honoraires",
-//                "prix_avec_honoraires",
-//                "honoraires",
+                "prix_base",
+                "prix_avec_remboursement",
+                "honoraire",
                 "indications_remboursement"
         });
         initFileContent(ns, presentationPath);
         isInit.put(ns,true);
     }
+    public void initAvisASMR(String avisPathASMR){
+        dbSchema.put(SchemaNameSpace.AVIS_ASMR, new String[]{
+                "CIS",
+                "code_dossier",
+                "motif_evaluation",
+                "date_avis",
+                "valeur",
+                "libelle",
+        });
+        initFileContent(SchemaNameSpace.AVIS_ASMR, avisPathASMR);
+        isInit.put(SchemaNameSpace.AVIS_ASMR,true);
+    }
+
+    public List<DataWrapper> parseASMR(){
+        return this.parse(SchemaNameSpace.AVIS_ASMR);
+    }
+
+    public List<DataWrapper> parseSMR(){
+        return this.parse(SchemaNameSpace.AVIS_SMR);
+    }
+
+
+    public void initAvisSMR(String avisPathSMR){
+        dbSchema.put(SchemaNameSpace.AVIS_SMR, new String[]{
+                "CIS",
+                "code_dossier",
+                "motif_evaluation",
+                "date_avis",
+                "valeur",
+                "libelle",
+        });
+        initFileContent(SchemaNameSpace.AVIS_SMR, avisPathSMR);
+        isInit.put(SchemaNameSpace.AVIS_SMR,true);
+    }
+
+//    public void initConditionPrescription(String conditionPath){
+//        dbSchema.put(SchemaNameSpace.CONDITION_PRESCRIPTION, new String[]{
+//                "CIS",
+//                "code_dossier",
+//                "motif_evaluation",
+//                "date_avis",
+//                "valeur",
+//                "libelle",
+//        });
+//        initFileContent(SchemaNameSpace.CONDITION_PRESCRIPTION, conditionPath);
+//        isInit.put(SchemaNameSpace.CONDITION_PRESCRIPTION,true);
+//    }
+//
+//    public void initInfos(String infosPath){
+//        dbSchema.put(SchemaNameSpace.INFOS, new String[]{
+//                "CIS",
+//                "code_dossier",
+//                "motif_evaluation",
+//                "date_avis",
+//                "valeur",
+//                "libelle",
+//        });
+//        initFileContent(SchemaNameSpace.INFOS, infosPath);
+//        isInit.put(SchemaNameSpace.INFOS,true);
+//    }
+//
+
 
     public void initMedicament(String medicamentPath) {
         dbSchema.put(SchemaNameSpace.MEDICAMENT, new String[]{
@@ -78,6 +143,9 @@ public class MedicalDataParser {
         return this.parse(SchemaNameSpace.PRESENTATION);
     }
 
+    public List<DataWrapper> parseComposants(){
+        return this.parse(SchemaNameSpace.COMPOSANT);
+    }
     private void initFileContent(SchemaNameSpace fileType, String filePath){
         try {
             var file = new FileInputStream(new File(filePath));
@@ -89,29 +157,40 @@ public class MedicalDataParser {
     private DataWrapper parseLine(SchemaNameSpace namespace, String line) {
         String[] values = line.split(SEPARATOR);
         String[] schema = dbSchema.get(namespace);
-        Map<String, Object> data = new LinkedHashMap<>();
+        Map<String, String> data = new LinkedHashMap<>();
         for (int i = 0; i < schema.length && i < values.length; i++) {
             String key = schema[i];
             String value = values[i];
-            Object parsedIntegerValue = integerParser(value);
-            data.put(key, (i==0)?parsedIntegerValue:booleanParser(value));
+//            Object parsedIntegerValue = integerParser(value);
+//            data.put(key, (i==0)?parsedIntegerValue:booleanParser(value));
+            data.put(key,value);
         }
         return new DataWrapper(data);
     }
 
-    public ArrayList<DataWrapper> parseMedicament(){
+    public static Date strToDate(String dateString, boolean isAvis) {
+         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+         if (isAvis) {
+             dateFormat = new SimpleDateFormat("yyyyMMdd");
+         }
+        try {
+            return dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    public List<DataWrapper> parseMedicament(){
         return this.parse(SchemaNameSpace.MEDICAMENT);
     }
 
-    public ArrayList<DataWrapper> parse(SchemaNameSpace namespace){
+    public List<DataWrapper> parse(SchemaNameSpace namespace){
         if (!(isInit.containsKey(namespace) && isInit.get(namespace))){
             return null;
         }
         String[] lines = this.fileContent.get(namespace).split(NEWLINE);
         ArrayList<DataWrapper> result = new ArrayList<>();
-        Arrays.stream(lines).forEach(line ->{
-            result.add(parseLine(namespace, this.trimEnd(line)));
-        });
+        Arrays.stream(lines).forEach(line -> result.add(parseLine(namespace, this.trimEnd(line))));
         return result;
     }
 
@@ -145,13 +224,18 @@ public class MedicalDataParser {
         return value.substring(0, len);
     }
 
+    public List<DataWrapper> parseComposant() {
+        return this.parse(SchemaNameSpace.COMPOSANT);
+    }
+
+
 
     private static class FileHelper {
         private static String readFromInputStream(InputStream inputStream)
                 throws IOException {
             StringBuilder resultStringBuilder = new StringBuilder();
             try (BufferedReader br
-                         = new BufferedReader(new InputStreamReader(inputStream))) {
+                         = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("windows-1252")))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     resultStringBuilder.append(line).append(NEWLINE);
