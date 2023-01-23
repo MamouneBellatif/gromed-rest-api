@@ -22,6 +22,23 @@ public class MedicalDataParser {
 
     Map<SchemaNameSpace, Boolean> isInit = new HashMap<>();
 
+    public void initGenerique(String path){
+        dbSchema.put(SchemaNameSpace.GROUPE_GENERIQUE,new String[]{
+                "id_generique",
+                "libelle_generique",
+                "CIS",
+                "type_generique"
+        });
+        initFileContent(SchemaNameSpace.GROUPE_GENERIQUE, path);
+        isInit.put(SchemaNameSpace.GROUPE_GENERIQUE, true);
+    }
+
+    public List<DataWrapper> parseGenerique(){
+        return this.parse(SchemaNameSpace.GROUPE_GENERIQUE);
+    }
+
+
+
     public void initComposants(String composantPath){
         dbSchema.put(SchemaNameSpace.COMPOSANT, new String[] {
                 "CIS",
@@ -35,6 +52,21 @@ public class MedicalDataParser {
         });
         initFileContent(SchemaNameSpace.COMPOSANT, composantPath);
         isInit.put(SchemaNameSpace.COMPOSANT, true);
+    }
+
+    public void initInfos(String path){
+        dbSchema.put(SchemaNameSpace.INFOS,new String[]{
+            "CIS",
+            "date_debut",
+            "date_fin",
+            "lien_info"
+        });
+        initFileContent(SchemaNameSpace.INFOS, path);
+        isInit.put(SchemaNameSpace.INFOS, true);
+    }
+
+    public List<DataWrapper> parseInfos(){
+        return parse(SchemaNameSpace.INFOS);
     }
 
     public void initPresentation(String presentationPath){
@@ -92,32 +124,19 @@ public class MedicalDataParser {
         isInit.put(SchemaNameSpace.AVIS_SMR,true);
     }
 
-//    public void initConditionPrescription(String conditionPath){
-//        dbSchema.put(SchemaNameSpace.CONDITION_PRESCRIPTION, new String[]{
-//                "CIS",
-//                "code_dossier",
-//                "motif_evaluation",
-//                "date_avis",
-//                "valeur",
-//                "libelle",
-//        });
-//        initFileContent(SchemaNameSpace.CONDITION_PRESCRIPTION, conditionPath);
-//        isInit.put(SchemaNameSpace.CONDITION_PRESCRIPTION,true);
-//    }
-//
-//    public void initInfos(String infosPath){
-//        dbSchema.put(SchemaNameSpace.INFOS, new String[]{
-//                "CIS",
-//                "code_dossier",
-//                "motif_evaluation",
-//                "date_avis",
-//                "valeur",
-//                "libelle",
-//        });
-//        initFileContent(SchemaNameSpace.INFOS, infosPath);
-//        isInit.put(SchemaNameSpace.INFOS,true);
-//    }
-//
+    public void initConditionPrescription(String conditionPath){
+        dbSchema.put(SchemaNameSpace.CONDITION_PRESCRIPTION, new String[]{
+                "CIS",
+                "condition"
+        });
+        initFileContent(SchemaNameSpace.CONDITION_PRESCRIPTION, conditionPath);
+        isInit.put(SchemaNameSpace.CONDITION_PRESCRIPTION,true);
+    }
+
+    public List<DataWrapper> parseConditionPrescription(){
+        return this.parse(SchemaNameSpace.CONDITION_PRESCRIPTION);
+    }
+
 
 
     public void initMedicament(String medicamentPath) {
@@ -161,8 +180,6 @@ public class MedicalDataParser {
         for (int i = 0; i < schema.length && i < values.length; i++) {
             String key = schema[i];
             String value = values[i];
-//            Object parsedIntegerValue = integerParser(value);
-//            data.put(key, (i==0)?parsedIntegerValue:booleanParser(value));
             data.put(key,value);
         }
         return new DataWrapper(data);
@@ -182,6 +199,8 @@ public class MedicalDataParser {
             return null;
         }
     }
+
+
 
     public List<DataWrapper> parseMedicament(){
         return this.parse(SchemaNameSpace.MEDICAMENT);

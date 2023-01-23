@@ -4,10 +4,7 @@ import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.model.enums.NatureComposant;
 import fr.miage.gromed.model.enums.TypeAvis;
 import fr.miage.gromed.model.enums.ValeurAvis;
-import fr.miage.gromed.model.medicament.ComposantSubtance;
-import fr.miage.gromed.model.medicament.Medicament;
-import fr.miage.gromed.model.medicament.MedicamentAvis;
-import fr.miage.gromed.model.medicament.Presentation;
+import fr.miage.gromed.model.medicament.*;
 import fr.miage.gromed.repositories.MedicamentRepository;
 import fr.miage.gromed.repositories.StockRepository;
 import fr.miage.gromed.utils.DataWrapper;
@@ -31,31 +28,30 @@ public class PopulateService {
     private MedicamentRepository medicamentRepository;
 
     @Autowired
-    private StockRepository stockRepository;
+    private ConditionPrescriptionRepository conditionPrescriptionRepository;
 
     private Map<Integer, String> medicamentLaboMap = new HashMap<>();
     public void populateMedicament() {
         medicalDataParser.initMedicament("src/main/resources/data/CIS_bdpm.txt");
         List<DataWrapper> list = medicalDataParser.parseMedicament();
         list.forEach(data -> {
-            Medicament.builder()
+            System.out.println(data.data.get("CIS"));
+            Medicament medicament = Medicament.builder()
                             .codeCIS(Integer.parseInt(data.data.get("CIS")))
                             .denomination(data.data.get("denomination"))
                             .formePharmaceutique(data.data.get("forme_pharmaceutique"))
                             .voiesAdministration(data.data.get("voies_administration"))
                             .statutAdministratif(data.data.get("statut_admin_AMM"))
-                            .dateAMM(MedicalDataParser.strToDate(data.data.get("dateAMM"), false))
+                            .dateAMM(MedicalDataParser.strToDate(data.data.get("date_AMM"), false))
                             .isSurveillanceRenforcee(Boolean.parseBoolean(data.data.get("surveillance_renforcee")))
                             .typeProcedureAMM(data.data.get("type_procedure_AMM"))
                             .statutBDM(data.data.get("statut_BDM"))
-                            .numeroAutorisationEuro(data.data.get("numero_autorisation_Europeenne"));
-            Medicament medicament = Medicament.builder().build();
+                            .numeroAutorisationEuro(data.data.get("numero_autorisation_Europeenne")).build();
             medicamentLaboMap.put(medicament.getCodeCIS(), data.data.get("titulaires"));
 
             System.out.println("populateMedicament: "+medicament.toString());
             System.out.println("###################");
             medicamentRepository.save(medicament);
-            medicament = null;
         });
     }
         //use medicalDataParser to parse CIS_CIP_bdpm.txt and save the result in the database accordingly to the model using medicamentRepository CIS as foreign key
@@ -67,14 +63,16 @@ public class PopulateService {
              medicamentOpt = medicamentRepository.findByCodeCIS(
                      Integer.parseInt(data.data.get("CIS")));
                 if (medicamentOpt.isPresent()) {
-                    Presentation.builder().codeCIP(Integer.parseInt(data.data.get("CIP")))
+                    Presentation presentation = Presentation.builder().codeCIP(Integer.parseInt(data.data.get("CIP")))
                             .libelle(data.data.get("libelle"))
                             .prixDeBase(Double.parseDouble(data.data.get("prix_base")))
-                            .honoraireRemboursement(Double.parseDouble(data.data.get("honoraire_remboursement")))
+                            .honoraireRemboursement(Double.parseDouble(data.data.get("honoraire")))
                             .tauxRemboursement(data.data.get("taux_remboursement"))
                             .isAgrement(Boolean.parseBoolean(data.data.get("agrement_collectivites")))
-                            .dateDeclaration(MedicalDataParser.strToDate(data.data.get("date_declaration_commercialisation"), false));
-                    Presentation presentation = Presentation.builder().build();
+                            .dateDeclaration(MedicalDataParser.strToDate(data.data.get("date_declaration_commercialisation"), false))
+                            .etatCommercialisation(data.data.get("etat_commercialisation"))
+                            .statutAdmin(data.data.get("statut_admin"))
+                            .build();
                     Medicament medicament = medicamentOpt.get();
                     medicament.addPresentation(presentation);
                     presentation.setStock(this.generateStock(presentation));
@@ -84,11 +82,10 @@ public class PopulateService {
      }
      private Stock generateStock(Presentation presentation){
              int stockValue = (int) (Math.random() * 1000) + 100;
-            Stock.builder().quantiteStockPhysique(stockValue)
+            return Stock.builder().quantiteStockPhysique(stockValue)
             .quantiteStockLogique(stockValue)
             .restockAlertFlag(false)
-            .presentation(presentation);
-            return Stock.builder().build();
+            .presentation(presentation).build();
      }
 
      public void populateComposant() {
@@ -99,14 +96,14 @@ public class PopulateService {
              medicamentOpt = medicamentRepository.findByCodeCIS(
                      Integer.parseInt(data.data.get("CIS")));
              if (medicamentOpt.isPresent()) {
-                 ComposantSubtance.builder()
+                 ComposantSubtance composantSubtance = ComposantSubtance.builder()
                          .codeSubstance(Integer.parseInt(data.data.get("code_substance")))
                          .denomination(data.data.get("denomination"))
                          .designationElementPharmaceutique(data.data.get("designation_element_pharmaceutique"))
                          .natureComposant(NatureComposant.fromString(data.data.get("nature_composant")))
                          .dosage(data.data.get("dosage_substance"))
-                         .referenceDosage(data.data.get("reference_dosage"));
-                    ComposantSubtance composantSubtance = ComposantSubtance.builder().build();
+                         .referenceDosage(data.data.get("reference_dosage"))
+                         .build();
                     Medicament medicament = medicamentOpt.get();
                     medicament.addComposant(composantSubtance);
                     medicamentRepository.save(medicament);
@@ -128,19 +125,56 @@ public class PopulateService {
              medicamentOpt = medicamentRepository.findByCodeCIS(
                      Integer.parseInt(data.data.get("CIS")));
              if (medicamentOpt.isPresent()) {
-                 MedicamentAvis.builder()
+                 MedicamentAvis avisSMR = MedicamentAvis.builder()
                          .dateAvis(MedicalDataParser.strToDate(data.data.get("date_avis"), true))
                          .codeDossier(data.data.get("code_dossier"))
                          .motif(data.data.get("motif_evaluation"))
                          .valeur(ValeurAvis.fromString(data.data.get("valeur")))
                          .libelle(data.data.get("libelle"))
-                         .typeAvisEnum(TypeAvis.SMR);
-                 MedicamentAvis avisSMR = MedicamentAvis.builder().build();
+                         .typeAvisEnum(TypeAvis.SMR).build();
                  Medicament medicament = medicamentOpt.get();
                  medicament.addAvis(avisSMR);
                  medicamentRepository.save(medicament);
              }
          });
      }
+
+     public void populateInfos(){
+         medicalDataParser.initInfos("src/main/resources/data/CIS_InfoImportantes_20221019150103_bdpm.txt");
+            List<DataWrapper> list = medicalDataParser.parseInfos();
+            list.forEach(data -> {
+                Optional<Medicament> medicamentOpt;
+                medicamentOpt = medicamentRepository.findByCodeCIS(
+                        Integer.parseInt(data.data.get("CIS")));
+                if (medicamentOpt.isPresent()) {
+                    Medicament medicament = medicamentOpt.get();
+                    medicament.addInfo(data.data.get("lien_info"));
+                    medicamentRepository.save(medicament);
+                }
+            });
+    }
+
+    public void populateConditions(){
+        medicalDataParser.initConditionPrescription("src/main/resources/data/CIS_CPD_bdpm.txt");
+        List<DataWrapper> list = medicalDataParser.parseConditionPrescription();
+        list.forEach(data -> {
+            if (conditionPrescriptionRepository.findByLibelle(data.data.get("libelle")).isEmpty()) {
+                ConditionPrescription conditionPrescription = ConditionPrescription.builder()
+                        .libelle(data.data.get("libelle"))
+                        .build();
+                conditionPrescriptionRepository.save(conditionPrescription);
+            }
+            Optional<Medicament> medicamentOpt = medicamentRepository.findByCodeCIS(
+                    Integer.parseInt(data.data.get("CIS")));
+            if (medicamentOpt.isPresent()) {
+                Medicament medicament = medicamentOpt.get();
+                medicament.setConditionsPrescription(data.data.get("condition_prescription"));
+                medicamentRepository.save(medicament);
+            }
+        });
+    }
+
+
+
 
 }

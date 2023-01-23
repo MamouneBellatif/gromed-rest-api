@@ -1,6 +1,7 @@
 package fr.miage.gromed.model.enums;
 
-public enum ValeurAvis {       I("I"),
+public enum ValeurAvis {
+    I("I"),
     II ("II"),
     III("III"),
     IV("IV"),

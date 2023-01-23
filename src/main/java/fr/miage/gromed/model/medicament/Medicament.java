@@ -62,8 +62,8 @@ public class Medicament {
     @Column
     private String conditionsPrescription;
 
-    @Column
-    private String informationImportantesHtmlAnchor;
+    @ElementCollection
+    private Set<String> informationImportantesHtmlAnchor;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="etablissement_id_fk", referencedColumnName = "etablissement_id")
@@ -82,12 +82,11 @@ public class Medicament {
     @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
     private Set<ComposantSubtance> composantList;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
+    @ManyToMany
     private Set<ConditionPrescription> conditionPrescriptionList;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="medicament_id", referencedColumnName = "medicament_id")
+    @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
     private Set<MedicamentAvis> medicamentAvisList;
 
     public void addPresentation(Presentation presentation){
@@ -100,6 +99,14 @@ public class Medicament {
 
     public void addComposant(ComposantSubtance composantSubtance) {
         this.composantList.add(composantSubtance);
+    }
+
+    public void addInfo(String info){
+        this.informationImportantesHtmlAnchor.add(info);
+    }
+
+    public void addConditionPrescription(ConditionPrescription conditionPrescription){
+        this.conditionPrescriptionList.add(conditionPrescription);
     }
     @Override
     public boolean equals(Object o) {
