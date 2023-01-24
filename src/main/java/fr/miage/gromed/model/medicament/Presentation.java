@@ -56,7 +56,6 @@ public class Presentation {
     @Column
     private String tauxRemboursement;
 
-    public static final int SEUIL = 100;
 
 
 

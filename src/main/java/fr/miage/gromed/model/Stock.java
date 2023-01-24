@@ -37,5 +37,7 @@ public class Stock {
     @Column(name = "transactional_version", columnDefinition = "integer DEFAULT 0", nullable = false)
     private int version;
 
+    public static final int SEUIL = 100;
+
 
 }

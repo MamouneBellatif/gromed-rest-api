@@ -63,7 +63,7 @@ public class PopulateService {
              medicamentOpt = medicamentRepository.findByCodeCIS(
                      Integer.parseInt(data.data.get("CIS")));
                 if (medicamentOpt.isPresent()) {
-                    Presentation presentation = Presentation.builder().codeCIP(Integer.parseInt(data.data.get("CIP")))
+                    Presentation presentation = Presentation.builder().codeCIP(Integer.parseInt(data.data.get("CIP13")))
                             .libelle(data.data.get("libelle"))
                             .prixDeBase(Double.parseDouble(data.data.get("prix_base")))
                             .honoraireRemboursement(Double.parseDouble(data.data.get("honoraire")))
@@ -158,17 +158,16 @@ public class PopulateService {
         medicalDataParser.initConditionPrescription("src/main/resources/data/CIS_CPD_bdpm.txt");
         List<DataWrapper> list = medicalDataParser.parseConditionPrescription();
         list.forEach(data -> {
-            if (conditionPrescriptionRepository.findByLibelle(data.data.get("libelle")).isEmpty()) {
-                ConditionPrescription conditionPrescription = ConditionPrescription.builder()
-                        .libelle(data.data.get("libelle"))
-                        .build();
-                conditionPrescriptionRepository.save(conditionPrescription);
-            }
+            Optional<ConditionPrescription> conditionPrescriptionOpt = conditionPrescriptionRepository.findByLibelle(data.data.get("libelle"));
+            ConditionPrescription conditionPrescription = conditionPrescriptionOpt.orElseGet(
+                    () -> ConditionPrescription.builder()
+                    .libelle(data.data.get("condition"))
+                    .build());
             Optional<Medicament> medicamentOpt = medicamentRepository.findByCodeCIS(
                     Integer.parseInt(data.data.get("CIS")));
             if (medicamentOpt.isPresent()) {
                 Medicament medicament = medicamentOpt.get();
-                medicament.setConditionsPrescription(data.data.get("condition_prescription"));
+                medicament.addConditionsPrescription(conditionPrescription);
                 medicamentRepository.save(medicament);
             }
         });

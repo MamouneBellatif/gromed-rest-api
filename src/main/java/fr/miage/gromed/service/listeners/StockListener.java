@@ -20,7 +20,7 @@ public class StockListener {
 
     @PostPersist
     public void postPersist(Stock stock) {
-        if (stock.getQuantiteStockPhysique() < Presentation.SEUIL) {
+        if (stock.getQuantiteStockPhysique() < Stock.SEUIL) {
             stock.setRestockAlertFlag(true);
             stockRepository.save(stock);
         }

@@ -59,8 +59,8 @@ public class Medicament {
     @Column
     private String numeroAutorisationEuro;
 
-    @Column
-    private String conditionsPrescription;
+//    @Column
+//    private String conditionsPrescription;
 
     @ElementCollection
     private Set<String> informationImportantesHtmlAnchor;
@@ -124,5 +124,9 @@ public class Medicament {
     @Override
     public String toString(){
         return "medoc CIS "+this.codeCIS+" id: "+this.id+" denom "+this.denomination;
+    }
+
+    public void addConditionsPrescription(ConditionPrescription conditionPrescription) {
+        this.conditionPrescriptionList.add(conditionPrescription);
     }
 }
