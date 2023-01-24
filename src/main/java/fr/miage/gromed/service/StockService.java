@@ -3,6 +3,7 @@ package fr.miage.gromed.service;
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.model.Stock;
+import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.PanierRepository;
 import fr.miage.gromed.repositories.StockRepository;
 import jakarta.persistence.LockModeType;
@@ -24,23 +25,21 @@ public class StockService {
 
     @Transactional
     @Lock(LockModeType.OPTIMISTIC)
-    public void updateStock(long productId, int quantity) {
-        Optional<Stock> stockOpt = stockRepository.findByPresentationId(productId);
-        if (stockOpt.isEmpty()) {
-            throw new RollbackException("Stock not found");
-        }
-        Stock stock = stockOpt.get();
+    public void updateStock(Presentation presentation, int quantity) {
+//        Optional<Stock> stockOpt = stockRepository.findByPresentationId(productId);
+//        Optional
+//        if (stockOpt.isEmpty()) {
+//            throw new RollbackException("Stock not found");
+//        }
+        Stock stock = presentation.getStock();
+//        Stock stock = stockOpt.get();
         stock.setQuantiteStockLogique(stock.getQuantiteStockLogique() - quantity);
         stockRepository.save(stock);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void addToPanier(Long panierId, Long presentationId, int quantity) {
-        Optional<Stock> stockOpt = stockRepository.findByPresentationId(presentationId);
-        if (stockOpt.isEmpty()) {
-            throw new RollbackException("Ce produit n'existe pas");
-        }
-        Stock stock = stockOpt.get();
+    public void addToPanier(Long panierId, Presentation presentation, int quantity) {
+        Stock stock = presentation.getStock();
         if (stock.getQuantiteStockLogique() < quantity) {
             throw new RollbackException("Stock indisponible");
         }
@@ -50,7 +49,7 @@ public class StockService {
             throw new RollbackException("Panier not found");
         }
         Panier panier = panierOpt.get();
-        panier.addItem(new PanierItem(stock.getPresentation(), quantity));
+//        panier.addItem(new PanierItem(stock.getPresentation(), quantity));
         panierRepository.save(panier);
     }
 }

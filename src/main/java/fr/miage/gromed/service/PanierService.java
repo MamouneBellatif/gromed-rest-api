@@ -27,7 +27,7 @@ public class PanierService {
         Panier panier = panierRepository.findById(productId).get();
         panier.getItems().forEach(panierItem -> {
 //            panierItem.getPresentation().
-            stockService.updateStock(panierItem.getPresentation().getId(), panierItem.getQuantite());
+            stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite());
         panierItem.setQuantite(panierItem.getQuantite() + quantity);
         });
         panierRepository.save(panier);

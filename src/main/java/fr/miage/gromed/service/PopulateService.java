@@ -7,6 +7,7 @@ import fr.miage.gromed.model.enums.ValeurAvis;
 import fr.miage.gromed.model.medicament.*;
 import fr.miage.gromed.repositories.MedicamentRepository;
 import fr.miage.gromed.repositories.PresentationRepository;
+import fr.miage.gromed.repositories.StockRepository;
 import fr.miage.gromed.utils.DataWrapper;
 import fr.miage.gromed.utils.MedicalDataParser;
 import jakarta.transaction.Transactional;
@@ -34,6 +35,7 @@ public class PopulateService {
 
     private Map<Integer, Medicament> medicamentCisMap = new HashMap<>();
 
+    private Map<Long, Presentation> presentationMap = new HashMap<>();
     Logger logger = Logger.getLogger(PopulateService.class.getName());
     @Autowired
     private PresentationRepository presentationRepository;
@@ -143,23 +145,22 @@ public class PopulateService {
          return str.contains(",")?str.replace(",", "."):str;
      }
 
-     private Stock generateStock (){
-             int stockValue = (int) (Math.random() * 1000) + 100;
-            return Stock.builder().quantiteStockPhysique(stockValue)
-            .quantiteStockLogique(stockValue)
-            .restockAlertFlag(false)
-//            .presentation(presentation)
-                    .build();
-     }
-
-    @Transactional
+//     private Stock generateStock (Presentation presentation){
+////        Random random = new Random();
+////             int stockValue = random.nextInt(100,1000);
+////            return Stock.builder().quantiteStockPhysique(stockValue)
+////            .quantiteStockLogique(stockValue)
+////            .restockAlertFlag(false)
+//////                    .presentation(presentation)
+////            .build();
+//     }
+//
+//    @Transactional
     public void populatePresCached(){
         medicalDataParser.initPresentation("src/main/resources/data/CIS_CIP_bdpm.txt");
         List<DataWrapper> list = medicalDataParser.parsePresentation();
         Set<Medicament> medicaments = new HashSet<>();
-//        List<Presentation> presentations = new ArrayList<>();
         list.forEach(data -> {
-//            if (!medicamentCisMap.isEmpty()) {
                 Medicament medicament = medicamentCisMap.get(Integer.parseInt(data.data.get("CIS")));
                 if (medicament != null && data.data.get("CIP13") != null) {
                         data.data.put("agrement_collectivites", sanitizeBool(data.data.get("agrement_collectivites")));
@@ -173,7 +174,6 @@ public class PopulateService {
                                 .dateDeclaration(MedicalDataParser.strToDate(data.data.get("date_declaration_commercialisation"), false))
                                 .etatCommercialisation(data.data.get("etat_commercialisation"))
                                 .statutAdmin(data.data.get("statut_admin"))
-//                                .stock(this.generateStock())
                                 .build();
                         medicament.addPresentation(presentation);
                         medicaments.add(medicament);
@@ -181,6 +181,25 @@ public class PopulateService {
 
         });
         medicamentRepository.saveAll(medicaments);
+    }
+    @Autowired
+    private StockRepository stockRepository;
+
+    @Transactional
+    public void initStock(){
+        List<Presentation> presentations = presentationRepository.findAll();
+        List<Stock> stocks = new ArrayList<>();
+        presentations.forEach(presentation -> {
+            Stock stock = new Stock();
+            Random random = new Random();
+            int stockValue = random.nextInt(101,1000);
+            stock.setQuantiteStockLogique(stockValue);
+            stock.setQuantiteStockPhysique(stockValue);
+            presentation.setStock(stock);
+            stocks.add(stock);
+        });
+        stockRepository.saveAll(stocks);
+        presentationRepository.saveAll(presentations);
     }
 
     private String sanitizeBool(String agrement_collectivites) {

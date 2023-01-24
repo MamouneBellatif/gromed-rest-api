@@ -43,9 +43,8 @@ public class Presentation {
     @Column
     private String statutAdmin;
 
-//    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id", unique = true)
-    @OneToOne( cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "stock_id_fk",referencedColumnName = "stock_id")
     private Stock stock;
 
 //    Si c'est faux un utilisateur de type etablissement hopital
