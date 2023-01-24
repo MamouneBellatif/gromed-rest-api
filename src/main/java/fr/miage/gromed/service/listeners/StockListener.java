@@ -20,18 +20,18 @@ public class StockListener {
 
     @PostPersist
     public void postPersist(Stock stock) {
-        if (stock.getQuantiteStockPhysique() < Stock.SEUIL) {
-            stock.setRestockAlertFlag(true);
-            stockRepository.save(stock);
-        }
+//        if (stock.getQuantiteStockPhysique() < Stock.SEUIL) {
+//            stock.setRestockAlertFlag(true);
+//            stockRepository.save(stock);
+//        }
     }
 
     @PrePersist
     @Transactional
     public void prePersist(Presentation presentation) {
-        if (presentation.getStock().getQuantiteStockLogique() < 0) {
-            throw new RuntimeException("Le stock ne peut pas être négatif");
-        }
+//        if (presentation.getStock().getQuantiteStockLogique() < 0) {
+//            throw new RuntimeException("Le stock ne peut pas être négatif");
+//        }
     }
 
 }

@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface PresentationRepository extends JpaRepository<Presentation, Long> {
 
+
 //    List<Presentation> findByMedicamentId(Long medicamentId);
 //    Collection<Presentation> findByMedicamentI(Long medicamentId);
 }

@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 public class Etablissement {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "etablissement_id", nullable = false)
     private Long id;
 

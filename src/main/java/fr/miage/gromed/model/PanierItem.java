@@ -14,7 +14,7 @@ import java.util.Map;
 @Getter
 public class PanierItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "panier_element_id", nullable = false)
     private Long id;
 

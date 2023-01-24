@@ -12,7 +12,7 @@ import lombok.Setter;
 public class Utilisateur {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "user_id", nullable = false)
     private Long id;
 

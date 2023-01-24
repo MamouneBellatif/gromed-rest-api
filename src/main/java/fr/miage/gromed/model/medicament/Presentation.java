@@ -13,17 +13,17 @@ import java.util.Date;
 @Setter
 @Builder
 @AllArgsConstructor
-@EntityListeners(StockListener.class)
+//@EntityListeners(StockListener.class)
 @NoArgsConstructor
 public class Presentation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "presentation_id", nullable = false)
     private Long id;
 
     @Column
-    private int codeCIP;
+    private Long codeCIP;
 
     @Column
     private String libelle;
@@ -45,16 +45,20 @@ public class Presentation {
 
 //    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 //    @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id", unique = true)
-    @OneToOne(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne( cascade = CascadeType.ALL, orphanRemoval = true)
     private Stock stock;
 
-    //Si c'est faux un utilisateur de type etablissement hopital
-    //ne peut pas acheter ce produit
+//    Si c'est faux un utilisateur de type etablissement hopital
+//    ne peut pas acheter ce produit
     @Column
     private Boolean isAgrement;
 
     @Column
     private String tauxRemboursement;
+
+//    @ManyToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+//    private Pres medicament;
+
 
 
 

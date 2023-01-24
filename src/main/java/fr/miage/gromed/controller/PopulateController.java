@@ -16,10 +16,21 @@ public class PopulateController {
         return "medicaments has been populated";
     }
 
-    @GetMapping("/populatePres")
-    public String populatePres(){
-        populateService.populatePresentation();
-        return "pres populate";
+//    @GetMapping("/populatePres")
+//    public String populatePres(){
+//        populateService.populatePresentation();
+//        return "pres populate";
+//    }
+    @GetMapping("/populatePresCached")
+    public String populatePresCached(){
+        populateService.populatePresCached();
+        return "pres populate cached";
+    }
+
+    @GetMapping("/populateCompCache")
+    public String populateSubsCache(){
+        populateService.populateComposantCached();
+        return "comp populate cached";
     }
 
     @GetMapping("/populateComp")

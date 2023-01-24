@@ -15,7 +15,7 @@ import lombok.*;
 public class Stock {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "stock_id", nullable = false)
     private Long id;
 
@@ -28,10 +28,6 @@ public class Stock {
 
     @Column
     private boolean restockAlertFlag;
-
-
-    @OneToOne
-    private Presentation presentation;
 
     @Version
     @Column(name = "transactional_version", columnDefinition = "integer DEFAULT 0", nullable = false)

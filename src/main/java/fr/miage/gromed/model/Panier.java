@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class Panier {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "panier_id", nullable = false)
     private Long id;
 

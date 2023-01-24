@@ -17,7 +17,7 @@ public class ComposantSubtance {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "composant_id", nullable = false)
     private Long id;
 

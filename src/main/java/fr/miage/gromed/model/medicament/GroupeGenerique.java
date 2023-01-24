@@ -11,7 +11,7 @@ import lombok.Setter;
 public class GroupeGenerique {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "groupe_generique_id", nullable = false)
     private Long id;
 
