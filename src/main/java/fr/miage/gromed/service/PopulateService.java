@@ -9,13 +9,11 @@ import fr.miage.gromed.repositories.MedicamentRepository;
 import fr.miage.gromed.repositories.StockRepository;
 import fr.miage.gromed.utils.DataWrapper;
 import fr.miage.gromed.utils.MedicalDataParser;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -31,9 +29,11 @@ public class PopulateService {
     private ConditionPrescriptionRepository conditionPrescriptionRepository;
 
     private Map<Integer, String> medicamentLaboMap = new HashMap<>();
+    @Transactional
     public void populateMedicament() {
         medicalDataParser.initMedicament("src/main/resources/data/CIS_bdpm.txt");
         List<DataWrapper> list = medicalDataParser.parseMedicament();
+        List<Medicament> medicaments = new ArrayList<>();
         list.forEach(data -> {
             System.out.println(data.data.get("CIS"));
             Medicament medicament = Medicament.builder()
@@ -48,12 +48,18 @@ public class PopulateService {
                             .statutBDM(data.data.get("statut_BDM"))
                             .numeroAutorisationEuro(data.data.get("numero_autorisation_Europeenne")).build();
             medicamentLaboMap.put(medicament.getCodeCIS(), data.data.get("titulaires"));
-
+            medicaments.add(medicament);
             System.out.println("populateMedicament: "+medicament.toString());
             System.out.println("###################");
-            medicamentRepository.save(medicament);
         });
+        int batchSize = 100;
+        for (int i = 0; i < medicaments.size(); i += batchSize) {
+            List<Medicament> batch = medicaments.subList(i, Math.min(i + batchSize, medicaments.size()));
+            medicamentRepository.saveAll(batch);
+            medicamentRepository.flush();
+        }
     }
+
         //use medicalDataParser to parse CIS_CIP_bdpm.txt and save the result in the database accordingly to the model using medicamentRepository CIS as foreign key
      public void populatePresentation() {
          medicalDataParser.initPresentation("src/main/resources/data/CIS_CIP_bdpm.txt");

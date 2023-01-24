@@ -18,11 +18,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(indexes = {
         @Index(name = "idx_medicament_denomination", columnList = "denomination"),
-        @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS", unique = true)
+        @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS")
 })
 public class Medicament {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "medicament_id", nullable = false)
     private Long id;
 
