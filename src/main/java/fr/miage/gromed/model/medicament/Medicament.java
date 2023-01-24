@@ -21,7 +21,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(indexes = {
         @Index(name = "idx_medicament_denomination", columnList = "denomination"),
-        @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS")
+        @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS", unique = true)
 })
 @Cacheable
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

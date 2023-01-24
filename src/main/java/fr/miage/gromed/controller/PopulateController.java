@@ -23,17 +23,6 @@ public class PopulateController {
         populateService.initStock();
         return "pres populate";
     }
-    @GetMapping("/populatePresCached")
-    public String populatePresCached(){
-        populateService.populatePresCached();
-        return "pres populate cached";
-    }
-
-    @GetMapping("/populateStock")
-    public String populateStock(){
-        populateService.initStock();
-        return "stock populate";
-    }
 
     @GetMapping("/populateCompCache")
     public String populateSubsCache(){

@@ -5,6 +5,7 @@ import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.service.listeners.StockListener;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.util.Date;
 
@@ -13,8 +14,13 @@ import java.util.Date;
 @Setter
 @Builder
 @AllArgsConstructor
-//@EntityListeners(StockListener.class)
 @NoArgsConstructor
+@Table(indexes = {
+        @Index(name = "idx_medicament_denomination", columnList = "libelle"),
+        @Index(name = "idx_pres_codeCIP", columnList = "codeCIP", unique = true)
+})
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Presentation {
 
     @Id

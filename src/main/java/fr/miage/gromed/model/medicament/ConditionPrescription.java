@@ -9,6 +9,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(indexes = {
+        @Index(name = "idx_condition_generique", columnList = "libelle", unique = true)
+})
 public class ConditionPrescription {
 
     @Id

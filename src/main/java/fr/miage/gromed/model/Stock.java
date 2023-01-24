@@ -32,16 +32,6 @@ public class Stock {
     @Column(name = "transactional_version", columnDefinition = "integer DEFAULT 0", nullable = false)
     private int version;
 
-
     public static final int SEUIL = 100;
-
-//        @PostPersist
-//    public void postPersist() {
-//        if (this.getQuantiteStockPhysique() < Stock.SEUIL) {
-//            this.setRestockAlertFlag(true);
-//
-//        }
-//    }
-
 
 }
