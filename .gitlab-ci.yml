@@ -1,4 +1,19 @@
-job1:
+stages:
+  - deploy
+
+
+job:
+  stage: deploy
+  script: 
+    - apt-get update -y
+    - apt-get install -y openconnect sshpass
+    - openconnect -v --protocol=anyconnect -u "bellatim" --authgroup="Etudiant de l' UGA" --passwd-on-stdin vpn.grenet.fr < <(echo "Eternity64e!")
+    - sshpass -p Eternity65e!! ssh ecloud@129.88.210.103 "cd /home/ecloud/TP_JAVA/Back && git fetch && git pull production "
+    - sshpass -p Eternity65e!! ssh ecloud@129.88.210.103 "sudo systemctl status run_front_angular.service"
+  when: manual
+
+
+deploy:
   stage: deploy
   script:
     - apt-get update -y
