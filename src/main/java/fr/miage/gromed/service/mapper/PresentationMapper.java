@@ -7,10 +7,13 @@ import fr.miage.gromed.model.medicament.Presentation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Component
 public class PresentationMapper implements EntityMapper<PresentationDto, Presentation>{
     @Override
     public Presentation toEntity(PresentationDto dto) {
@@ -39,7 +42,7 @@ public class PresentationMapper implements EntityMapper<PresentationDto, Present
 
     @Override
     public List<PresentationDto> toDto(List<Presentation> entityList) {
-        return null;
+        return entityList.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     @Override

@@ -25,7 +25,13 @@ public class PresentationService {
     }
 
     public Page<PresentationDto> searchPresentation(String string, Pageable pageable){
-        var presentationPage = presentationRepository.findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCaseOrCodeCIPContaining(string, pageable);
-        return presentationMapper.toPageableDto(presentationPage, pageable);
+        try {
+            var cip = Long.parseLong(string);
+             return presentationMapper.toPageableDto(presentationRepository.findByCodeCIP(cip,pageable),pageable);
+        }catch (NumberFormatException e){
+            var presentationPage = presentationRepository.findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCase(string,string, pageable);
+            System.out.println(presentationPage.getSize());
+            return presentationMapper.toPageableDto(presentationPage, pageable);
+        }
     }
 }

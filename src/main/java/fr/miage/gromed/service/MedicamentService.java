@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 @Service
 public class MedicamentService {
 
-    private final MedicamentRepository medicamentRepository;
+    private MedicamentRepository medicamentRepository;
 
-    private final MedicamentMapper medicamentMapper;
+    private MedicamentMapper medicamentMapper;
 
     @Autowired
     public MedicamentService(MedicamentRepository medicamentRepository, MedicamentMapper medicamentMapper) {

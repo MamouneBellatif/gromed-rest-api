@@ -12,8 +12,11 @@ import java.util.List;
 
 public interface PresentationRepository extends JpaRepository<Presentation, Long> {
 
-Page<Presentation> findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCaseOrCodeCIPContaining(String libelle,
-                                                     Pageable pageable);
+Page<Presentation>
+findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCase
+        (String libelle,String denom,Pageable pageable);
+
+    Page<Presentation> findByCodeCIP(Long cip, Pageable pageable);
 //    @Query("SELECT m FROM Medicament m WHERE m.codeCIS LIKE %:id%")
 //    Page<Presentation> findByCodeCIPContaining(@Param("id") Integer id);
 }

@@ -41,6 +41,7 @@ public class PanierGarbageCollector {
     public void checkExpiredPanier() {
         LocalDateTime now = LocalDateTime.now();
         Timestamp timestamp = Timestamp.valueOf(now);
+//       30 minutes
         List<Panier> expiredPaniers = panierRepository.findByDateCreationBefore(timestamp);
 
             expiredPaniers.forEach(panier -> {
