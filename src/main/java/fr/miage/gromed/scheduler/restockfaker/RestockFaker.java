@@ -1,4 +1,4 @@
-package fr.miage.gromed.restockfaker;
+package fr.miage.gromed.scheduler.restockfaker;
 
 import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.repositories.StockRepository;

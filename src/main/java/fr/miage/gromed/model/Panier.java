@@ -3,6 +3,8 @@ package fr.miage.gromed.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Date;
 import java.util.List;
 @Setter
@@ -17,17 +19,22 @@ public class Panier implements AbstractEntity<Long> {
     @Column(name = "panier_id", nullable = false)
     private Long id;
 
+
+
     @OneToMany
     @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
     private List<PanierItem> items;
 
     //date with hour and minute
-//    @Temporal(TemporalType.TIMESTAMP)
     @Column
-    private Date dateCreation;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Timestamp dateCreation;
 
     @Column
     private boolean isPaid;
+
+    @Column
+    private boolean isExpired;
 
     @ManyToOne
     @JoinColumn(name = "user_id_fk", referencedColumnName = "user_id")
