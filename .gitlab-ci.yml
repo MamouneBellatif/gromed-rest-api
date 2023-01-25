@@ -1,9 +1,4 @@
-
-
-stages:
-  - deploy
-
-deploy:
+job1:
   stage: deploy
   script:
     - apt-get update -y
@@ -13,5 +8,4 @@ deploy:
     - sshpass -p Eternity65e!! ssh ecloud@129.88.210.103 "sudo systemctl status run_front_angular.service"
   only:
     - production
-  environment:
-    name: production
+  when: manual
