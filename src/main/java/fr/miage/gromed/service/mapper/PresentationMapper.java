@@ -27,6 +27,7 @@ public class PresentationMapper implements EntityMapper<PresentationDto, Present
                 .libelle(entity.getLibelle())
                 .prixDeBase(entity.getPrixDeBase())
                 .honoraireRemboursement(entity.getHonoraireRemboursement())
+                .medicamentDenomination(entity.getMedicament().getDenomination())
                 .build();
     }
 

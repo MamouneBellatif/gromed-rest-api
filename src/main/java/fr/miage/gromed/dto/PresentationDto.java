@@ -14,6 +14,7 @@ import java.io.Serializable;
 public class PresentationDto implements Serializable {
     private final Long codeCIP;
     private final String libelle;
+    private final String medicamentDenomination;
     private final double prixDeBase;
     private final double honoraireRemboursement;
 //    private final String statutAdmin;
