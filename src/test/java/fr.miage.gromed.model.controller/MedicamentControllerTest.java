@@ -1,27 +1,15 @@
 package fr.miage.gromed.model.controller;
 
-import com.fasterxml.jackson.databind.util.BeanUtil;
-import com.google.gson.Gson;
-import fr.miage.gromed.model.controller.CustomUtils;
-import fr.miage.gromed.model.controller.MedicamentController;
+import fr.miage.gromed.controller.MedicamentController;
 import fr.miage.gromed.model.dto.MedicamentDto;
-import fr.miage.gromed.model.mapper.EntityMapper;
-import fr.miage.gromed.model.mapper.MedicamentMapper;
-import fr.miage.gromed.model.medicament.Medicament;
-import fr.miage.gromed.model.service.MedicamentService;
+import fr.miage.gromed.service.listeners.MedicamentService;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -30,7 +18,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 @Transactional

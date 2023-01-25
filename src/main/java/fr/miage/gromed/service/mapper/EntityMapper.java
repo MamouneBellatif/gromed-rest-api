@@ -1,4 +1,4 @@
-package fr.miage.gromed.model.mapper;
+package fr.miage.gromed.service.mapper;
 
 import java.util.List;
 import java.util.Set;

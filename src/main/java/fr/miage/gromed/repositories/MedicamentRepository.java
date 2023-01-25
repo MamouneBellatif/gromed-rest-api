@@ -4,6 +4,7 @@ import fr.miage.gromed.model.medicament.Medicament;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MedicamentRepository extends JpaRepository<Medicament, Long> {
@@ -13,8 +14,7 @@ public interface MedicamentRepository extends JpaRepository<Medicament, Long> {
 
         //custom query select * from medicament where codeCIS = ?1*
 
-        @Query("select m from Medicament m where m.codeCIS = ?1")
-        Optional<Medicament> findByCodeCISBis(int codeCIS);
+        List<Medicament> findAllByCodeCISIn(List<Integer> codeCISListe);
 
 }
 

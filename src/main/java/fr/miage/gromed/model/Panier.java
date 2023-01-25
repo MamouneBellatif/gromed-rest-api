@@ -1,14 +1,17 @@
 package fr.miage.gromed.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.List;
-
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Data
-public class Panier {
+public class Panier implements AbstractEntity<Long> {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "panier_id", nullable = false)
@@ -48,4 +51,9 @@ public class Panier {
     }
 
     //make the possibility to m
+
+    @Override
+    public Long getId() {
+        return id;
+    }
 }

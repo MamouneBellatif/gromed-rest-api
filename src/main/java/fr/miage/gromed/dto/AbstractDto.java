@@ -1,4 +1,4 @@
-package fr.miage.gromed.model.dto;
+package fr.miage.gromed.dto;
 
 import java.time.LocalDateTime;
 
