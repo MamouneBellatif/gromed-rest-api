@@ -31,4 +31,7 @@ public class Etablissement {
     @Column
     private String categorie;
 
+    @Column
+    private boolean booleanIsHopital;
+
 }

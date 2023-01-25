@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/medicament")
 @RestController
-@Slf4j
+//@Slf4j
 public class MedicamentController {
     private final MedicamentService medicamentService;
 

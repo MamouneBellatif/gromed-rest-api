@@ -76,8 +76,8 @@ public class Medicament {
     @JoinColumn(name="etablissement_id_fk", referencedColumnName = "etablissement_id")
     private Etablissement laboratoire;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
+//    @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
+    @OneToMany(mappedBy = "medicament",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Presentation> presentationList;
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
@@ -133,6 +133,7 @@ public class Medicament {
     public String toString(){
         return "medoc CIS "+this.codeCIS+" id: "+this.id+" denom "+this.denomination;
     }
+
 
     public void addConditionsPrescription(ConditionPrescription conditionPrescription) {
         this.conditionPrescriptionList.add(conditionPrescription);

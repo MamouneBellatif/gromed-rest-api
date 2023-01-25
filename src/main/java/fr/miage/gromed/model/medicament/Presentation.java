@@ -61,6 +61,12 @@ public class Presentation {
     @Column
     private String tauxRemboursement;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Medicament medicament;
+
+//    public <R> R getMedicament() {
+//    }
+
 //    @ManyToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
 //    private Pres medicament;
 
