@@ -67,7 +67,9 @@ public class Medicament {
 //    @Column
 //    private String conditionsPrescription;
 
+
     @ElementCollection
+    @Column(length=10000)
     private Set<String> informationImportantesHtmlAnchor;
 
     @ManyToOne(cascade = CascadeType.ALL)

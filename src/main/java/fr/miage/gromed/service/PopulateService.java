@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -174,14 +175,13 @@ public class PopulateService {
 
      @Transactional
      public void populateComposant() {
+
          medicalDataParser.initComposants("src/main/resources/data/CIS_COMPO_bdpm.txt");
          List<DataWrapper> list = medicalDataParser.parseComposant();
+         Map<Integer,Medicament> fetchedMedicaments = medicamentRepository.findAll().stream().collect(Collectors.toMap(Medicament::getCodeCIS, medicament -> medicament));
          List<Medicament> medicaments = new ArrayList<>();
          list.forEach(data -> {
-             Optional<Medicament> medicamentOpt;
-             medicamentOpt = medicamentRepository.findByCodeCIS(
-                     Integer.parseInt(data.data.get("CIS")));
-             if (medicamentOpt.isPresent()) {
+             Medicament medicament = fetchedMedicaments.get(Integer.parseInt(data.data.get("CIS")));
                  try {
                      ComposantSubtance composantSubtance = ComposantSubtance.builder()
                              .codeSubstance(Integer.parseInt(data.data.get("code_substance")))
@@ -191,13 +191,11 @@ public class PopulateService {
                              .dosage(data.data.get("dosage_substance"))
                              .referenceDosage(data.data.get("reference_dosage"))
                              .build();
-                     Medicament medicament = medicamentOpt.get();
                      medicament.addComposant(composantSubtance);
                      medicaments.add(medicament);
                  } catch (Exception e) {
                      logger.warning("Error parsing code substance: " + data.data.get("code_substance"));
                  }
-             }
          });
              medicamentRepository.saveAll(medicaments);
      }
@@ -207,7 +205,8 @@ public class PopulateService {
         medicalDataParser.initAvisASMR("src/main/resources/data/CIS_HAS_ASMR_bdpm.txt");
         medicalDataParser.initAvisSMR("src/main/resources/data/CIS_HAS_SMR_bdpm.txt");
 
-        List<Medicament> medicaments = new ArrayList<>();
+         Map<Integer,Medicament> fetchedMedicaments = medicamentRepository.findAll().stream().collect(Collectors.toMap(Medicament::getCodeCIS, medicament -> medicament));
+         List<Medicament> medicaments = new ArrayList<>();
 
         List<DataWrapper> resultAsmr = medicalDataParser.parseASMR();
         resultAsmr.forEach(data -> data.data.put("type_avis", "ASMR"));
@@ -215,22 +214,16 @@ public class PopulateService {
         resultSmr.forEach(data -> data.data.put("type_avis", "SMR"));
         resultAsmr.addAll(resultSmr);
         Stream.concat(resultSmr.stream(), resultAsmr.stream()).forEach(data -> {
-             Optional<Medicament> medicamentOpt;
-             medicamentOpt = medicamentRepository.findByCodeCIS(
-                     Integer.parseInt(data.data.get("CIS")));
-             if (medicamentOpt.isPresent()) {
-                 MedicamentAvis avisSMR = MedicamentAvis.builder()
+            Medicament medicament = fetchedMedicaments.get(Integer.parseInt(data.data.get("CIS")));
+            MedicamentAvis avisSMR = MedicamentAvis.builder()
                          .dateAvis(MedicalDataParser.strToDate(data.data.get("date_avis"), true))
                          .codeDossier(data.data.get("code_dossier"))
                          .motif(data.data.get("motif_evaluation"))
                          .valeur(ValeurAvis.fromString(data.data.get("valeur")))
                          .libelle(data.data.get("libelle"))
                          .typeAvisEnum(TypeAvis.SMR).build();
-                 Medicament medicament = medicamentOpt.get();
                  medicament.addAvis(avisSMR);
-//                 medicamentRepository.save(medicament);
                  medicaments.add(medicament);
-             }
          });
              medicamentRepository.saveAll(medicaments);
 
@@ -260,8 +253,15 @@ public class PopulateService {
 
         medicalDataParser.initConditionPrescription("src/main/resources/data/CIS_CPD_bdpm.txt");
         List<DataWrapper> list = medicalDataParser.parseConditionPrescription();
-        //create a new list wwith distinct libelle
-        Stream<String> libelleList = list.stream().map(data -> data.data.get("libelle"));
+        Map<String,String> cisConditionMap = new HashMap<>();
+        list.forEach(data -> {
+            cisConditionMap.put(data.data.get("CIS"),data.data.get("condition_prescription"));
+        });
+//        Map<String,String> cisConditionMap = list.stream().collect(Collectors.toMap(data -> data.data.get("CIS"), data -> data.data.get("condition")));
+        Map<String, List<String>> newMap = cisConditionMap.entrySet().stream()
+                .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+
+        Stream<String> libelleList = list.stream().map(data -> data.data.get("condition"));
         Stream<String> distinctLibelleList = libelleList.distinct();
         Set<ConditionPrescription> conditionPrescriptions = new HashSet<>();
         distinctLibelleList.forEach(libelle -> {
@@ -269,44 +269,26 @@ public class PopulateService {
                     .libelle(libelle)
                     .build();
             conditionPrescriptions.add(conditionPrescription);
+            List<Integer> cis = newMap.get(libelle).stream().map(Integer::parseInt).collect(Collectors.toList());
+            List<Medicament> medicamentList = medicamentRepository.findAllByCodeCISIn(cis);
+            medicamentList.forEach(medicament -> {
+                medicament.addConditionPrescription(conditionPrescription);
+                medicaments.add(medicament);
+            });
+            //            cis.forEach(cisStr -> {
+//                Optional<Medicament> medicamentOpt;
+//                medicamentOpt = medicamentRepository.findByCodeCIS(
+//                        Integer.parseInt(cisStr));
+//                if (medicamentOpt.isPresent()) {
+//                    Medicament medicament = medicamentOpt.get();
+//                    medicament.addCondition(conditionPrescription);
+//                    medicaments.add(medicament);
+//                }
+//            });
         });
-
 
         conditionPrescriptionRepository.saveAll(conditionPrescriptions);
-        list.forEach(data -> {
-            Optional<Medicament> medicamentOpt = medicamentRepository.findByCodeCIS(
-                    Integer.parseInt(data.data.get("CIS")));
-            if (medicamentOpt.isPresent()) {
-                Optional<ConditionPrescription> conditionPrescriptionOpt = conditionPrescriptionRepository.findByLibelle(data.data.get("libelle"));
-                ConditionPrescription conditionPrescription = conditionPrescriptionOpt.orElseGet(
-                        () -> ConditionPrescription.builder()
-                                .libelle(data.data.get("condition"))
-                                .build());
-                Medicament medicament = medicamentOpt.get();
-                medicament.addConditionsPrescription(conditionPrescription);
-                medicamentRepository.save(medicament);
-                medicaments.add(medicament);
-            }
-        });
-//                .filter(distinctByKey(p -> p.data.get("libelle")))
-//                .collect(Collectors.toList());
 
-
-        list.forEach(data -> {
-            Optional<Medicament> medicamentOpt = medicamentRepository.findByCodeCIS(
-                    Integer.parseInt(data.data.get("CIS")));
-            if (medicamentOpt.isPresent()) {
-                Optional<ConditionPrescription> conditionPrescriptionOpt = conditionPrescriptionRepository.findByLibelle(data.data.get("libelle"));
-                ConditionPrescription conditionPrescription = conditionPrescriptionOpt.orElseGet(
-                        () -> ConditionPrescription.builder()
-                                .libelle(data.data.get("condition"))
-                                .build());
-                Medicament medicament = medicamentOpt.get();
-                medicament.addConditionsPrescription(conditionPrescription);
-                medicamentRepository.save(medicament);
-                medicaments.add(medicament);
-            }
-        });
         medicamentRepository.saveAll(medicaments);
     }
 

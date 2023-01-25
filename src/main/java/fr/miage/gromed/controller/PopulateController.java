@@ -30,10 +30,22 @@ public class PopulateController {
         return "comp populate cached";
     }
 
+    @GetMapping("/populateCond")
+    public String populateCond(){
+        populateService.populateConditions();
+        return "cond populate";
+    }
+
     @GetMapping("/populateComp")
     public String populateSubs(){
         populateService.populateComposant();
         return "comp populate";
+    }
+
+    @GetMapping("/populateInfo")
+    public String populateInfo(){
+        populateService.populateInfos();
+        return "info populate";
     }
 
     @GetMapping("/populateAvis")
