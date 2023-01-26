@@ -5,6 +5,7 @@ import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.service.listeners.StockListener;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.util.Date;
 
@@ -13,17 +14,22 @@ import java.util.Date;
 @Setter
 @Builder
 @AllArgsConstructor
-@EntityListeners(StockListener.class)
 @NoArgsConstructor
+@Table(indexes = {
+        @Index(name = "idx_medicament_denomination", columnList = "libelle"),
+        @Index(name = "idx_pres_codeCIP", columnList = "codeCIP", unique = true)
+})
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Presentation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "presentation_id", nullable = false)
     private Long id;
 
     @Column
-    private int codeCIP;
+    private Long codeCIP;
 
     @Column
     private String libelle;
@@ -43,18 +49,27 @@ public class Presentation {
     @Column
     private String statutAdmin;
 
-//    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id", unique = true)
-    @OneToOne(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "stock_id_fk",referencedColumnName = "stock_id")
     private Stock stock;
 
-    //Si c'est faux un utilisateur de type etablissement hopital
-    //ne peut pas acheter ce produit
+//    Si c'est faux un utilisateur de type etablissement hopital
+//    ne peut pas acheter ce produit
     @Column
     private Boolean isAgrement;
 
     @Column
     private String tauxRemboursement;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Medicament medicament;
+
+//    public <R> R getMedicament() {
+//    }
+
+//    @ManyToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+//    private Pres medicament;
+
 
 
 

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 public class StockListener {
 
     @Autowired
-    private PresentationRepository presentationRepository;
-    @Autowired
     private StockRepository stockRepository;
 
     @PostPersist
@@ -28,8 +26,8 @@ public class StockListener {
 
     @PrePersist
     @Transactional
-    public void prePersist(Presentation presentation) {
-        if (presentation.getStock().getQuantiteStockLogique() < 0) {
+    public void prePersist(Stock stock) {
+        if (stock.getQuantiteStockLogique() < 0) {
             throw new RuntimeException("Le stock ne peut pas être négatif");
         }
     }

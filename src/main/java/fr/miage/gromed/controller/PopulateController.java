@@ -12,25 +12,45 @@ public class PopulateController {
     private PopulateService populateService;
     @GetMapping("/populateMedicament")
      public String populate() {
-        populateService.populateMedicament();
+//        populateService.populateMedicament();
         return "medicaments has been populated";
     }
 
-    @GetMapping("/populatePres")
-    public String populatePres(){
-        populateService.populatePresentation();
+    @GetMapping("/populate")
+    public String populateAll(){
+//        populateService.populateMedicament();
+//        populateService.populatePresCached();
+//        populateService.initStock();
         return "pres populate";
+    }
+
+    @GetMapping("/populateCompCache")
+    public String populateSubsCache(){
+//        populateService.populateComposantCached();
+        return "comp populate cached";
+    }
+
+    @GetMapping("/populateCond")
+    public String populateCond(){
+//        populateService.populateConditions();
+        return "cond populate";
     }
 
     @GetMapping("/populateComp")
     public String populateSubs(){
-        populateService.populateComposant();
+//        populateService.populateComposant();
         return "comp populate";
+    }
+
+    @GetMapping("/populateInfo")
+    public String populateInfo(){
+//        populateService.populateInfos();
+        return "info populate";
     }
 
     @GetMapping("/populateAvis")
     public String populateAvis(){
-        populateService.populateAvis();
+//        populateService.populateAvis();
         return "avis populate";
     }
 

@@ -6,6 +6,16 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+
 public interface PanierRepository extends JpaRepository<Panier, Long> {
-    Optional<Panier> findByIdPanier(long idPanier);
+     List<Panier> findByDateCreationAfter(LocalDateTime expirationTime);
+
+    Optional<Panier> findById(Long idPanier);
+
+
 }

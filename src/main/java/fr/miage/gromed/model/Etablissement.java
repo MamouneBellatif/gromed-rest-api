@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 public class Etablissement {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "etablissement_id", nullable = false)
     private Long id;
 
@@ -30,5 +30,8 @@ public class Etablissement {
     private String numSiret;
     @Column
     private String categorie;
+
+    @Column
+    private boolean booleanIsHopital;
 
 }

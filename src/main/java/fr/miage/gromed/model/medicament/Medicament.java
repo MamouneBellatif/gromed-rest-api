@@ -4,6 +4,9 @@ import fr.miage.gromed.model.Etablissement;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Cascade;
+
 
 import java.util.Date;
 import java.util.Objects;
@@ -18,8 +21,10 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(indexes = {
         @Index(name = "idx_medicament_denomination", columnList = "denomination"),
-        @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS")
+        @Index(name = "idx_medicament_codecis_unq", columnList = "codeCIS", unique = true)
 })
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Medicament {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -62,30 +67,33 @@ public class Medicament {
 //    @Column
 //    private String conditionsPrescription;
 
+
     @ElementCollection
+    @Column(length=10000)
     private Set<String> informationImportantesHtmlAnchor;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="etablissement_id_fk", referencedColumnName = "etablissement_id")
     private Etablissement laboratoire;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
+//    @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
+    @OneToMany(mappedBy = "medicament",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Presentation> presentationList;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
     private Set<GroupeGenerique>  groupeGeneriqueList;
 
 //    @OneToMany(mappedBy = "medicaments",cascade = CascadeType.ALL)
-    @OneToMany( cascade  = CascadeType.ALL)
+    @OneToMany( cascade  = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
     private Set<ComposantSubtance> composantList;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private Set<ConditionPrescription> conditionPrescriptionList;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinColumn(name="medicament_id_fk", referencedColumnName = "medicament_id")
     private Set<MedicamentAvis> medicamentAvisList;
 
@@ -113,7 +121,7 @@ public class Medicament {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Medicament that = (Medicament) o;
-        return id != null && Objects.equals(id, that.id);
+        return id != null && Objects.equals(id, that.id) || Objects.equals(codeCIS, that.codeCIS);
     }
 
     @Override
@@ -125,6 +133,7 @@ public class Medicament {
     public String toString(){
         return "medoc CIS "+this.codeCIS+" id: "+this.id+" denom "+this.denomination;
     }
+
 
     public void addConditionsPrescription(ConditionPrescription conditionPrescription) {
         this.conditionPrescriptionList.add(conditionPrescription);

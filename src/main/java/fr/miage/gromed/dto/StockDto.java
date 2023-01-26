@@ -1,18 +1,16 @@
 package fr.miage.gromed.dto;
 
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
+import java.io.Serializable;
+
+/**
+ * A DTO for the {@link fr.miage.gromed.model.Stock} entity
+ */
 @Data
-@Getter
-@Setter
-public class StockDto {
-    
-    private boolean restockAlertFlag;
-    private int presentation;
-    
-
-
-
+@Builder
+public class StockDto implements Serializable {
+    private final int quantiteStockLogique;
+    private final int presentationCIP;
 }

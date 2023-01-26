@@ -8,18 +8,17 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @EntityListeners(StockListener.class)
 @NoArgsConstructor
 public class Stock {
 
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "stock_id", nullable = false)
     private Long id;
 
-    @Setter
     @Column
     private int quantiteStockLogique;
 
@@ -29,15 +28,10 @@ public class Stock {
     @Column
     private boolean restockAlertFlag;
 
-
-    @OneToOne
-    private Presentation presentation;
-
     @Version
     @Column(name = "transactional_version", columnDefinition = "integer DEFAULT 0", nullable = false)
     private int version;
 
     public static final int SEUIL = 100;
-
 
 }

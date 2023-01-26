@@ -1,59 +1,37 @@
 package fr.miage.gromed.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
+import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.PresentationRepository;
+import fr.miage.gromed.service.mapper.MedicamentMapper;
+import fr.miage.gromed.service.mapper.PresentationMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.RequestEntity;
+import org.springframework.stereotype.Service;
 
+@Service
 public class PresentationService {
-    @Autowired 
-    private PresentationRepository presentationRepository;
 
-    public List<Presentation> findAll() {
-        return presentationRepository.findAll();
+    private final PresentationRepository presentationRepository;
+    private final PresentationMapper presentationMapper;
+
+    @Autowired
+    public PresentationService(PresentationRepository presentationRepository, PresentationMapper presentationMapper) {
+        this.presentationMapper = presentationMapper;
+        this.presentationRepository = presentationRepository;
     }
 
-    public Presentation findByCodeCip(String cip) {
-        Optional<Presentation> presentation = presentationRepository.findByCodeCip(cip);
-        if (presentation.isPresent()) {
-            return presentation.get();
-        } else {
-            return null;
-        }
-    }
-
-    public Presentation save(Presentation presentation) {
-        return presentationRepository.save(presentation);
-    }
-
-    public boolean delete(String cip) {
-        Optional<Presentation> existingPresentation = presentationRepository.findByCodeCip(cip);
-        if (existingPresentation.isPresent()) {
-            presentationRepository.delete(existingPresentation.get());
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void update(String cip, Presentation presentation) {
-        Optional<Presentation> existingPresentation = presentationRepository.findByCodeCip(cip);
-        if (existingPresentation.isPresent()) {
-            Presentation presentationToUpdate = existingPresentation.get();
-            presentationToUpdate.setLibelle(presentation.getLibelle());
-            presentationToUpdate.setPrixDeBase(presentation.getPrixDeBase());
-            presentationToUpdate.setHonoraireRemboursement(presentation.getHonoraireRemboursement());
-            presentationToUpdate.setDateDeclaration(presentation.getDateDeclaration());
-            presentationToUpdate.setEtatCommercialisation(presentation.getEtatCommercialisation());
-            presentationToUpdate.setStock(presentation.getStock());
-            save(presentationToUpdate);
-        
-        } else {
-            presentationRepository.save(presentation);
+    public Page<PresentationDto> searchPresentation(String string, Pageable pageable){
+        try {
+            var cip = Long.parseLong(string);
+             return presentationMapper.toPageableDto(presentationRepository.findByCodeCIP(cip,pageable),pageable);
+        }catch (NumberFormatException e){
+            var presentationPage = presentationRepository.findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCase(string,string, pageable);
+            System.out.println(presentationPage.getSize());
+            return presentationMapper.toPageableDto(presentationPage, pageable);
         }
     }
 }
-
