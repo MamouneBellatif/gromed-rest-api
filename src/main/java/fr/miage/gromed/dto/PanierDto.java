@@ -13,6 +13,8 @@ import lombok.Setter;
 @Setter
 @Getter
 public class PanierDto implements Serializable{
+    private Long id;
+
     private List<PanierItem> items; 
     
 

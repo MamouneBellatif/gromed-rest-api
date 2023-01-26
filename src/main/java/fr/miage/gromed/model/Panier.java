@@ -6,6 +6,9 @@ import lombok.Data;
 import java.sql.Date;
 import java.util.List;
 
+import fr.miage.gromed.dto.PresentationDto;
+import fr.miage.gromed.model.medicament.Presentation;
+
 @Entity
 @Data
 public class Panier {
@@ -46,6 +49,7 @@ public class Panier {
     public void addItem(PanierItem item) {
         this.items.add(item);
     }
+
 
     //make the possibility to m
 }
