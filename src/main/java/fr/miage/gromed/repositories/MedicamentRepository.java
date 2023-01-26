@@ -8,13 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MedicamentRepository extends JpaRepository<Medicament, Long> {
-//    List<Medicament> findByComposantListLibe(List<ComposantSubtance> composantList);
-//    List<Medicament> findByDenomination(String denomination);
+
         Optional<Medicament> findByCodeCIS(int codeCIS);
-
-        //custom query select * from medicament where codeCIS = ?1*
-
         List<Medicament> findAllByCodeCISIn(List<Integer> codeCISListe);
+        List<Medicament> findByDenominationContainingIgnoreCaseOrFormePharmaceutiqueContainingIgnoreCase(String denomination, String formePharmaceutique);
 
+
+//        @Query("SELECT m FROM Medicament m WHERE m.denomination LIKE %?1% OR m.formePharmaceutique LIKE %?2%")
 }
 

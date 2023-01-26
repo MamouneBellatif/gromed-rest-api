@@ -112,6 +112,7 @@ public class PopulateService {
                                 .dateDeclaration(MedicalDataParser.strToDate(data.data.get("date_declaration_commercialisation"), false))
                                 .etatCommercialisation(data.data.get("etat_commercialisation"))
                                 .statutAdmin(data.data.get("statut_admin"))
+                                .medicament(medicament)
                                 .build();
                         medicament.addPresentation(presentation);
                         medicaments.add(medicament);

@@ -16,10 +16,8 @@ import java.util.Set;
 public class MedicamentMapper {
 
 
+
     public Medicament toEntity(MedicamentDto dto) {
-
-
-
         return null;
     }
 
@@ -45,7 +43,7 @@ public class MedicamentMapper {
 
 
     public List<MedicamentDto> toDto(List<Medicament> entityList) {
-        return null;
+        return entityList.stream().map(this::toDto).toList();
     }
 
 
