@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,5 +21,5 @@ import java.util.List;
 public class PanierDto implements Serializable {
     private Long id;
     private List<PanierItemDto> items;
-    private Timestamp dateCreation;
+    private LocalDateTime dateCreation;
 }

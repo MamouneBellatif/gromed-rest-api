@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.service.PresentationService;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path="/api/presentation/",produces = MediaType.APPLICATION_JSON_VALUE)
 public class PresentationController {

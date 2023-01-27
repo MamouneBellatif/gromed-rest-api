@@ -23,7 +23,7 @@ public class PanierMapper implements EntityMapper<PanierDto, Panier> {
 
     @Override
     public PanierDto toDto(Panier entity) {
-        List<PanierItem> listItems = entity.getItems();
+        Set<PanierItem> listItems = entity.getItems();
         List<PanierItemDto> listItemsDto = listItems.stream().map(item -> panierItemMapper.toDto(item)).toList();
 
         return PanierDto.builder()
