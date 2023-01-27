@@ -8,6 +8,8 @@ import fr.miage.gromed.exceptions.PanierNotFoundException;
 import fr.miage.gromed.exceptions.StockIndisponibleException;
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.PanierItem;
+import fr.miage.gromed.model.Utilisateur;
+import fr.miage.gromed.model.medicament.Medicament;
 import fr.miage.gromed.repositories.PanierRepository;
 import fr.miage.gromed.service.mapper.PanierItemMapper;
 import fr.miage.gromed.service.mapper.PanierMapper;
@@ -40,7 +42,6 @@ PanierService {
         this.stockService = stockService;
         this.panierMapper = panierMapper;
         this.panierItemMapper = panierItemMapper;
-
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -120,6 +121,7 @@ PanierService {
     //TODO: Lier utilisateur à panier
     @Transactional
     public PanierDto createPanier(PanierItemDto itemDtoSet) {
+        //this.isAllowedToBuy(panier, user);
         Panier panier = Panier.builder()
                         .dateCreation(LocalDateTime.now())
                         .isPaid(false)
@@ -150,7 +152,7 @@ PanierService {
     }
 
     @Transactional
-    private PanierDto resolveItem(AlerteStockDecisionDto alerteStockDecisionDto){
+    public PanierDto resolveItem(AlerteStockDecisionDto alerteStockDecisionDto){
         PanierItem panierItem = panierItemMapper.toEntity(alerteStockDecisionDto.getPanierItemDto());
         if (alerteStockDecisionDto.isAccept()) {
             panierItem.setDelayed(true);
@@ -196,4 +198,9 @@ PanierService {
            return panier.isExpired();
     }
 
+    public boolean isUserAllowedToBuy(Medicament medicament, Utilisateur utilisateur)
+    {
+        // Vérifier agrément du medicmaent et et etablissement de l'utilisateur (si Hopital)
+        return true;
+    }
 }

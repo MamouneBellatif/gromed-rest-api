@@ -51,8 +51,10 @@ public class PanierController {
     @PostMapping("/create")
     public ResponseEntity<Object> createPanier(@RequestBody PanierItemDto panierItemDto){
         try {
+            System.out.println(panierItemDto);
             //TODO: verifier utilisateur
             PanierDto panierDto = panierService.createPanier(panierItemDto);
+            logger.info(panierDto.toString() + " "+panierDto);
             return ResponseHandler.generateResponse("Nouveau panier OK", HttpStatus.CREATED, panierDto);
         } catch (StockIndisponibleException e) {
             return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.GONE);
