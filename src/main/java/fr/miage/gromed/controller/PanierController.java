@@ -1,12 +1,11 @@
-package fr.miage.gromed.controller.curstomResponse;
+package fr.miage.gromed.controller;
 
-import fr.miage.gromed.controller.PanierResponseEntity;
+import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.*;
 import fr.miage.gromed.exceptions.ExpiredPanierException;
 import fr.miage.gromed.exceptions.PanierNotFoundException;
 import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.exceptions.StockIndisponibleException;
-import fr.miage.gromed.model.medicament.Presentation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,29 +49,34 @@ public class PanierController {
      * Creer un panier avec un item, retourne le panier ou un message d'alerte
      */
     @PostMapping("/create")
-    public PanierResponseEntity createPanier(@RequestBody PanierItemDto panierItemDto){
+    public ResponseEntity<Object> createPanier(@RequestBody PanierItemDto panierItemDto){
         try {
             //TODO: verifier utilisateur
             PanierDto panierDto = panierService.createPanier(panierItemDto);
-            return new PanierResponseEntity(panierDto, HttpStatus.OK);
-        }   catch (StockIndisponibleException e) {
-            return new PanierResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }catch (PresentationNotFoundException pnfe) {
-            return new PanierResponseEntity(pnfe.getMessage(), HttpStatus.NOT_FOUND);
+            return ResponseHandler.generateResponse("Nouveau panier OK", HttpStatus.CREATED, panierDto);
+        } catch (StockIndisponibleException e) {
+            return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.GONE);
+        } catch (PresentationNotFoundException enf) {
+            return ResponseHandler.generateFailureResponse(enf.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             logger.error("Erreur: ", e);
-            return new PanierResponseEntity(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseHandler.generateFailureResponse(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/resolve")
-    public PanierResponseEntity resolvePanier(@RequestBody AlerteStockDecisionDto decisionDto, @PathVariable Long idPanier){
+    public ResponseEntity<Object> resolvePanier(@RequestBody AlerteStockDecisionDto decisionDto, @PathVariable Long idPanier){
         try {
             //TODO: verifier utilisateur
-            PanierDto panierDto = panierService.resolvePanier(decisionDto);
-            return new PanierResponseEntity(panierDto, HttpStatus.OK);
+            PanierDto panierDto = panierService.resolve(decisionDto);
+            return ResponseHandler.generateResponse("résolu", HttpStatus.GONE, panierDto);
+        } catch (ExpiredPanierException epe) {
+            return ResponseHandler.generateFailureResponse(epe.getMessage(), HttpStatus.GONE);
+        } catch (PanierNotFoundException pnfe) {
+            return ResponseHandler.generateFailureResponse(pnfe.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new PanierResponseEntity(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("Erreur: ", e);
+            return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

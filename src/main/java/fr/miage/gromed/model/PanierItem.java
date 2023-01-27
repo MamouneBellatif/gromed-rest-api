@@ -32,5 +32,4 @@ public class PanierItem {
     @Column
     private boolean delayed;
 
-
 }
