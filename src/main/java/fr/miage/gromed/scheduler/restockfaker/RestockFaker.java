@@ -15,7 +15,7 @@ public class RestockFaker {
     Logger log = Logger.getLogger(RestockFaker.class.getName());
     @Autowired
     private StockRepository stockRepository;
-    @Scheduled(cron ="0 0 0 * * *")
+        @Scheduled(cron ="0 0 0 * * *")
     public void restock() {
         List<Stock> toRestock = stockRepository.findByRestockAlertFlagTrue();
         toRestock.forEach(stock -> {

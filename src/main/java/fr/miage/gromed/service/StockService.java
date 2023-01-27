@@ -1,10 +1,11 @@
 package fr.miage.gromed.service;
 
+import fr.miage.gromed.exceptions.StockIndisponibleException;
 import fr.miage.gromed.model.Panier;
-import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.PanierRepository;
+import fr.miage.gromed.repositories.PresentationRepository;
 import fr.miage.gromed.repositories.StockRepository;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.RollbackException;
@@ -22,20 +23,25 @@ public class StockService {
     private StockRepository stockRepository;
     @Autowired
     private PanierRepository panierRepository;
+    @Autowired
+    private PresentationRepository presentationRepository;
+
+    public static void checkStock(Panier panier) {
+    }
 
     @Transactional
     @Lock(LockModeType.OPTIMISTIC)
-    public void updateStock(Presentation presentation, int quantity) {
-//        Optional<Stock> stockOpt = stockRepository.findByPresentationId(productId);
-//        Optional
-//        if (stockOpt.isEmpty()) {
-//            throw new RollbackException("Stock not found");
-//        }
+    public void updateStock(Presentation presentation, int quantity, boolean isCancellingOrder) {
         Stock stock = presentation.getStock();
-//        Stock stock = stockOpt.get();
-        stock.setQuantiteStockLogique(stock.getQuantiteStockLogique() - quantity);
-        stockRepository.save(stock);
-    }
+        int newQuantity = stock.getQuantiteStockLogique() +(isCancellingOrder ? (- quantity): quantity);
+        if (stock.getQuantiteStockLogique() < quantity) { //h
+            throw new StockIndisponibleException();
+        }
+            stock.setQuantiteStockLogique(newQuantity);
+            stockRepository.save(stock);
+            presentationRepository.save(presentation);
+        }
+
 
     @Transactional(rollbackFor = Exception.class)
     public void addToPanier(Long panierId, Presentation presentation, int quantity) {

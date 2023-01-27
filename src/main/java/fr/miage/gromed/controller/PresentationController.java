@@ -12,6 +12,10 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import fr.miage.gromed.model.medicament.Presentation;
+import fr.miage.gromed.service.PresentationService;
+
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path="/api/presentation/",produces = MediaType.APPLICATION_JSON_VALUE)
 public class PresentationController {
@@ -22,7 +26,7 @@ public class PresentationController {
         this.presentationService = presentationService;
     }
 
-    @PostMapping(value = "/{searchQuery}",
+    @GetMapping(value = "/{searchQuery}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Page<PresentationDto>> searchByString(@PathVariable String searchQuery, @PageableDefault(sort = "libelle", size = 10) Pageable pageable) {
         var presentationPage = presentationService.searchPresentation(searchQuery,pageable);
