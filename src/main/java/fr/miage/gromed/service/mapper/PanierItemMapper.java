@@ -1,6 +1,7 @@
 package fr.miage.gromed.service.mapper;
 
 import fr.miage.gromed.dto.PanierItemDto;
+import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.PresentationRepository;
@@ -21,8 +22,9 @@ public class PanierItemMapper implements EntityMapper<PanierItemDto, PanierItem>
     @Override
     public PanierItem toEntity(PanierItemDto dto) {
         Optional<Presentation> presentationOpt = presentationRepository.findByCodeCIP(dto.getPresentationCip());
+        System.out.println(dto.getPresentationCip());
         if(presentationOpt.isEmpty()){
-            throw new RuntimeException("Presentation not found");
+            throw new PresentationNotFoundException();
         }
         return PanierItem.builder()
                 .quantite(dto.getQuantite())

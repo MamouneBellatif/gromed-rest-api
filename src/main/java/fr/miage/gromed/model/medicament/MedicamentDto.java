@@ -11,7 +11,7 @@ import java.util.Set;
  * A DTO for the {@link Medicament} entity
  */
 @Data
-public class MedicamentDto implements Serializable {
+public class MedicamentDto extends MedicamentAvis implements Serializable {
     private final int codeCIS;
     private final String denomination;
     private final String formePharmaceutique;

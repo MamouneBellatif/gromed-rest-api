@@ -1,13 +1,8 @@
 package fr.miage.gromed.controller;
 
-import fr.miage.gromed.controller.curstomResponse.AbstractResponseEntity;
+import fr.miage.gromed.controller.customResponse.AbstractResponseEntity;
 import fr.miage.gromed.dto.PanierDto;
-import fr.miage.gromed.model.Panier;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 

@@ -10,6 +10,8 @@ import lombok.Setter;
 public class AlerteStockDecisionDto {
     private AlerteDecision decision;
     private TypeAlerte typeAlerte;
+
+    //panier ItemDto ou PanierDto (exclusif)
     private PanierItemDto panierItemDto;
     private PanierDto panierDto;
 

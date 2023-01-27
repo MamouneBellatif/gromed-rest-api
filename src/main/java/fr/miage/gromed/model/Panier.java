@@ -69,6 +69,9 @@ public class Panier implements AbstractEntity<Long> {
     @Column
     private boolean isDelivered;
 
+    @Column
+    private boolean delayed;
+
     public void addItem(PanierItem item) {
         this.items.add(item);
     }
