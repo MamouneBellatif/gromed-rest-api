@@ -9,7 +9,6 @@ import fr.miage.gromed.exceptions.StockIndisponibleException;
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.repositories.PanierRepository;
-import fr.miage.gromed.scheduler.restockfaker.PanierCleanExpired;
 import fr.miage.gromed.service.mapper.PanierItemMapper;
 import fr.miage.gromed.service.mapper.PanierMapper;
 import jakarta.persistence.LockModeType;

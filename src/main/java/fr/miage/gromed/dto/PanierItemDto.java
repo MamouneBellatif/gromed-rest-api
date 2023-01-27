@@ -19,4 +19,6 @@ public class PanierItemDto implements Serializable{
     private Long presentationCip;
 
     private boolean delayed;
+
+
 }

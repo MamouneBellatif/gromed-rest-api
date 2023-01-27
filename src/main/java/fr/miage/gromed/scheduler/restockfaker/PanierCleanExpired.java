@@ -25,7 +25,7 @@ public class PanierCleanExpired implements Runnable {
 
     private PanierRepository panierRepository;
 
-    @Autowired
+//    @Autowired
     public PanierCleanExpired(StockService stockService, PanierService panierService) {
         this.stockService = stockService;
         this.panierService = panierService;
