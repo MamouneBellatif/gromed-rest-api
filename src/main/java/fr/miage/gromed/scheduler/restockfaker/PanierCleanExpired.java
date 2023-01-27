@@ -45,7 +45,9 @@ public class PanierCleanExpired implements Runnable {
             if (panierOpt.isPresent()) {
                 Panier panier = panierOpt.get();
                 panierService.resetStockLogique(panier);
-                panierRepository.delete(panier);
+                panier.setExpired(true);
+                panierRepository.save(panier);
+//                panierRepository.delete(panier);
             }
             List<Panier> expiredCarts = panierRepository.findByDateCreationAfter(expirationDate);
 

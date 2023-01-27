@@ -9,6 +9,8 @@ import java.sql.Timestamp;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+
 import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.model.medicament.Presentation;
 import org.hibernate.annotations.Type;
@@ -30,7 +32,7 @@ public class Panier implements AbstractEntity<Long> {
 //    @OneToMany(mappedBy = "panier", cascade = CascadeType.ALL, orphanRemoval = true
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
-    private List<PanierItem> items;
+    private Set<PanierItem> items;
 
     //date with hour and minute
 
@@ -39,6 +41,9 @@ public class Panier implements AbstractEntity<Long> {
 
     @Column
     private boolean isPaid;
+
+    @Column
+    private boolean isCanceled;
 
     @Column
     private boolean isExpired;
@@ -50,6 +55,7 @@ public class Panier implements AbstractEntity<Long> {
     //    @Temporal(TemporalType.TIMESTAMP)
     @Column
     private Date datePaiement;
+
 
     @Column
     private Date dateLivraison;
@@ -73,4 +79,5 @@ public class Panier implements AbstractEntity<Long> {
     public Long getId() {
         return id;
     }
+
 }

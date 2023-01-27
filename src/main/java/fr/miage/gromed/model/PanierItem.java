@@ -29,5 +29,8 @@ public class PanierItem {
     @Column
     private int delivree;
 
+    @Column
+    private boolean delayed;
+
 
 }

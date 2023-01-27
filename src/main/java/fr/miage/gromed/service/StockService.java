@@ -35,7 +35,7 @@ public class StockService {
         Stock stock = presentation.getStock();
         int newQuantity = stock.getQuantiteStockLogique() +(isCancellingOrder ? (- quantity): quantity);
         if (stock.getQuantiteStockLogique() < quantity) { //h
-            throw new StockIndisponibleException("Stock indisponible");
+            throw new StockIndisponibleException();
         }
             stock.setQuantiteStockLogique(newQuantity);
             stockRepository.save(stock);

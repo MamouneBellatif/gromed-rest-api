@@ -1,9 +1,13 @@
 package fr.miage.gromed.service;
 
+import fr.miage.gromed.dto.AlerteStockDecisionDto;
 import fr.miage.gromed.dto.PanierDto;
 import fr.miage.gromed.dto.PanierItemDto;
+import fr.miage.gromed.exceptions.ExpiredPanierException;
+import fr.miage.gromed.exceptions.PanierNotFoundException;
 import fr.miage.gromed.exceptions.StockIndisponibleException;
 import fr.miage.gromed.model.Panier;
+import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.repositories.PanierRepository;
 import fr.miage.gromed.scheduler.restockfaker.PanierCleanExpired;
 import fr.miage.gromed.service.mapper.PanierItemMapper;
@@ -14,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +80,7 @@ PanierService {
     public PanierDto getPanier(Long idPanier) {
         Optional<Panier> panierOpt = panierRepository.findById(idPanier);
         if(panierOpt.isEmpty()) {
-            return null;
+            throw new PanierNotFoundException();
         }
         Panier panier = panierOpt.get();
         return panierMapper.toDto(panier);
@@ -121,7 +126,7 @@ PanierService {
 
     //Ajouter USER apres l'auth
     @Transactional
-    public PanierDto createPanier(Set<PanierItemDto> itemDtoSet) {
+    public PanierDto createPanier(PanierItemDto itemDtoSet) {
         Panier panier = Panier.builder()
                         .dateCreation(LocalDateTime.now())
                         .isPaid(false)
@@ -129,9 +134,9 @@ PanierService {
                 .isShipped(false)
                 .isDelivered(false)
 //                .items()
-
         .build();
-
+        PanierItemDto panierItemDto = sanitizeItemsInput(itemDtoSet);
+        panier.addItem(panierItemMapper.toEntity(panierItemDto));
         panierRepository.save(panier);
 //        PanierCleanExpired.run();
         return panierMapper.toDto(panier);
@@ -148,4 +153,52 @@ PanierService {
             stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), true);
         });
     }
+
+    @Transactional
+    private PanierDto resolveItem(AlerteStockDecisionDto alerteStockDecisionDto){
+        PanierItem panierItem = panierItemMapper.toEntity(alerteStockDecisionDto.getPanierItemDto());
+        if (alerteStockDecisionDto.isAccept()) {
+            panierItem.setDelayed(true);
+            Panier panier = panierRepository.findByItemsId(panierItem.getId());
+            panierRepository.save(panier);
+            return panierMapper.toDto(panier);
+        }
+        Panier panier = panierRepository.findByItemsId(panierItem.getId());
+        panier.setCanceled(true);
+        stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), true);
+        panierRepository.save(panier);
+        return panierMapper.toDto(panier);
+    }
+
+    private PanierDto resolveCommande(AlerteStockDecisionDto alerteStockDecisionDto){
+//            Panier panier = panierMapper.toEntity(alerteStockDecisionDto.getPanierDto());
+//            if (alerteStockDecisionDto.isAccept()) {
+//                panier.setDelayed(true);
+//                panierRepository.save(panier);
+//                return panierMapper.toDto(panier);
+//            }
+        return null;
+    }
+
+    @Transactional
+    public PanierDto resolvePanier(AlerteStockDecisionDto alerteStockDecisionDto){
+        if (checkExpiredPanier(panierMapper.toEntity(alerteStockDecisionDto.getPanierDto()))) {
+            throw new ExpiredPanierException();
+        }
+        if (alerteStockDecisionDto.isItem()) {
+            return resolveItem(alerteStockDecisionDto);
+        }
+        return resolveCommande(alerteStockDecisionDto);
+    }
+
+    public boolean checkExpiredPanier(Panier panier) {
+        LocalDateTime expirationDate = LocalDateTime.now().minusMinutes(30);
+        if (panier.getDateCreation().isBefore(expirationDate)) {
+            this.resetStockLogique(panier);
+            panier.setExpired(true);
+            panierRepository.save(panier);
+        }
+           return panier.isExpired();
+    }
+
 }

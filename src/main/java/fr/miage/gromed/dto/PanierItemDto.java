@@ -17,4 +17,6 @@ import lombok.Setter;
 public class PanierItemDto implements Serializable{
     private int quantite;
     private Long presentationCip;
+
+    private boolean delayed;
 }
