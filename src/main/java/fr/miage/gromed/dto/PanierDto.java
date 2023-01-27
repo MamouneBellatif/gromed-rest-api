@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A DTO for the {@link Panier} entity
@@ -20,6 +21,6 @@ import java.util.List;
 @AllArgsConstructor
 public class PanierDto implements Serializable {
     private Long id;
-    private List<PanierItemDto> items;
+    private Set<PanierItemDto> items;
     private LocalDateTime dateCreation;
 }

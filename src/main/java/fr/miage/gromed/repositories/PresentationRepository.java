@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface PresentationRepository extends JpaRepository<Presentation, Long> {
 
     Page<Presentation>
-    findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCase
-            (String libelle,String denom,Pageable pageable);
+    findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCaseAndPrixDeBaseNotNullAndPrixDeBaseGreaterThan
+            (String libelle,String denom,Pageable pageable, double prix);
 
     Page<Presentation> findByCodeCIP(Long cip, Pageable pageable);
 

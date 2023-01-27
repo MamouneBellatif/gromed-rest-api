@@ -4,9 +4,12 @@ import fr.miage.gromed.controller.PanierResponseEntity;
 import fr.miage.gromed.dto.*;
 import fr.miage.gromed.exceptions.ExpiredPanierException;
 import fr.miage.gromed.exceptions.PanierNotFoundException;
+import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.exceptions.StockIndisponibleException;
 import fr.miage.gromed.model.medicament.Presentation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,24 +22,27 @@ import fr.miage.gromed.service.PanierService;
 @RequestMapping("/api/panier")
 public class PanierController {
 
+    public static final String ERREUR_INTERNE = "Erreur interne";
     private final PanierService panierService;
 
+    Logger logger = LoggerFactory.getLogger(PanierController.class);
     @Autowired
     public PanierController(PanierService panierService) {
         this.panierService = panierService;
     }
 
     @GetMapping("/{idPanier}")
-    public PanierResponseEntity getPanier(@PathVariable Long idPanier){
+    public ResponseEntity<Object> getPanier(@PathVariable Long idPanier){
         try {
             PanierDto panierDto = panierService.getPanier(idPanier);
-            return new PanierResponseEntity(panierDto, HttpStatus.OK);
+            return ResponseHandler.generateResponse("Nouveau panier OK", HttpStatus.CREATED, panierDto);
         } catch (ExpiredPanierException epe) {
-            return new PanierResponseEntity(epe.getMessage(),HttpStatus.GONE);
+            return ResponseHandler.generateFailureResponse(epe.getMessage(), HttpStatus.GONE);
         } catch (PanierNotFoundException pnfe) {
-            return new PanierResponseEntity(pnfe.getMessage(),(HttpStatus.NOT_FOUND));
+            return ResponseHandler.generateFailureResponse(pnfe.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new PanierResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("Erreur: ", e);
+            return ResponseHandler.generateFailureResponse(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -51,8 +57,11 @@ public class PanierController {
             return new PanierResponseEntity(panierDto, HttpStatus.OK);
         }   catch (StockIndisponibleException e) {
             return new PanierResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }catch (PresentationNotFoundException pnfe) {
+            return new PanierResponseEntity(pnfe.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new PanierResponseEntity("Erreur interne", HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("Erreur: ", e);
+            return new PanierResponseEntity(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -63,7 +72,7 @@ public class PanierController {
             PanierDto panierDto = panierService.resolvePanier(decisionDto);
             return new PanierResponseEntity(panierDto, HttpStatus.OK);
         } catch (Exception e) {
-            return new PanierResponseEntity("Erreur interne", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new PanierResponseEntity(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -29,7 +29,8 @@ public class PresentationService {
             var cip = Long.parseLong(string);
              return presentationMapper.toPageableDto(presentationRepository.findByCodeCIP(cip,pageable),pageable);
         }catch (NumberFormatException e){
-            var presentationPage = presentationRepository.findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCase(string,string, pageable);
+//            var presentationPage = presentationRepository.findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCase(string,string, pageable);
+            var presentationPage = presentationRepository.findByLibelleContainingIgnoreCaseOrMedicamentDenominationContainingIgnoreCaseAndPrixDeBaseNotNullAndPrixDeBaseGreaterThan(string,string, pageable, 0.0);
             System.out.println(presentationPage.getSize());
             return presentationMapper.toPageableDto(presentationPage, pageable);
         }

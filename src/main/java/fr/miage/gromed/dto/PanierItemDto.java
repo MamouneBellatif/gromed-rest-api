@@ -3,17 +3,14 @@ package fr.miage.gromed.dto;
 import java.io.Serializable;
 
 import fr.miage.gromed.model.medicament.Presentation;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
-
+import lombok.*;
 
 
 @Builder
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class PanierItemDto implements Serializable{
     private int quantite;
     private Long presentationCip;

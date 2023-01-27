@@ -17,13 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static java.time.Instant.now;
+import java.util.*;
 
 @Service
 public class
@@ -132,7 +127,7 @@ PanierService {
                         .isExpired(false)
                 .isShipped(false)
                 .isDelivered(false)
-//                .items()
+                .items(new LinkedHashSet<>())
         .build();
         PanierItemDto panierItemDto = sanitizeItemsInput(itemDtoSet);
         panier.addItem(panierItemMapper.toEntity(panierItemDto));
