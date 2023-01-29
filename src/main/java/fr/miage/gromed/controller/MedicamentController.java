@@ -1,7 +1,7 @@
 //package fr.miage.gromed.controller;
 //
 //import fr.miage.gromed.dto.MedicamentDto;
-//import fr.miage.gromed.service.MedicamentService;
+//import fr.miage.gromed.service.metier.MedicamentService;
 //import lombok.extern.slf4j.Slf4j;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.data.domain.Page;

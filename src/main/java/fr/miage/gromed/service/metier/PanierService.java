@@ -1,4 +1,4 @@
-package fr.miage.gromed.service;
+package fr.miage.gromed.service.metier;
 
 import fr.miage.gromed.dto.AlerteStockDecisionDto;
 import fr.miage.gromed.dto.PanierDto;

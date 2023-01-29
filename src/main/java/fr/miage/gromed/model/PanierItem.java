@@ -26,8 +26,13 @@ public class PanierItem {
     @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id")
     private Presentation presentation;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Panier panier;
+
+    //Nombre livré de cet item pour la commande
     @Column
     private int delivree;
+
 
     @Column
     private boolean delayed;

@@ -29,9 +29,8 @@ public class Panier implements AbstractEntity<Long> {
 
 
 
-//    @OneToMany(mappedBy = "panier", cascade = CascadeType.ALL, orphanRemoval = true
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
+//    @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
+    @OneToMany(mappedBy="panier", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PanierItem> items;
 
     //date with hour and minute

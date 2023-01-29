@@ -1,4 +1,4 @@
-package fr.miage.gromed.service;
+package fr.miage.gromed.service.metier;
 
 import fr.miage.gromed.dto.MedicamentDto;
 import fr.miage.gromed.model.medicament.Medicament;

@@ -1,6 +1,6 @@
 package fr.miage.gromed.controller;
 
-import fr.miage.gromed.service.PopulateService;
+import fr.miage.gromed.service.metier.PopulateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,14 +16,25 @@ public class PopulateController {
         return "medicaments has been populated";
     }
 
+    @GetMapping("/getCsv")
+     public String populatePresentation() {
+        populateService.parseCisLibelle();
+        return "fichier generé";
+    }
+
     @GetMapping("/populate")
     public String populateAll(){
-//        populateService.populateMedicament();
-//        populateService.populatePresCached();
-//        populateService.initStock();
+        populateService.populateMedicament();
+        populateService.populatePresCached();
+        populateService.initStock();
         return "pres populate";
     }
 
+    @GetMapping("populUrls")
+    public String populateUrls(){
+        populateService.populateUrls();
+        return "urls populate";
+    }
     @GetMapping("/populateCompCache")
     public String populateSubsCache(){
 //        populateService.populateComposantCached();

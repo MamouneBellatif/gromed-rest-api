@@ -3,10 +3,14 @@ package fr.miage.gromed.model;
 import fr.miage.gromed.model.enums.ComptabiliteParametres;
 import fr.miage.gromed.service.listeners.ComptabiliteListener;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
-@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 @EntityListeners(ComptabiliteListener.class)
 public class ComptabiliteInterne {
     @Id

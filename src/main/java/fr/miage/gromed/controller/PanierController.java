@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import fr.miage.gromed.service.PanierService;
+import fr.miage.gromed.service.metier.PanierService;
 
 
 @RestController
@@ -51,8 +51,10 @@ public class PanierController {
     @PostMapping("/create")
     public ResponseEntity<Object> createPanier(@RequestBody PanierItemDto panierItemDto){
         try {
+            //TODO: verifier token utilisateur
+            //TODO: verifier si l'utilisateur a deja un panier actif
+            //TODO: verifier si l'utilisateur a le droit d'acheter le produit
             System.out.println(panierItemDto);
-            //TODO: verifier utilisateur
             PanierDto panierDto = panierService.createPanier(panierItemDto);
             logger.info(panierDto.toString() + " "+panierDto);
             return ResponseHandler.generateResponse("Nouveau panier OK", HttpStatus.CREATED, panierDto);
@@ -81,6 +83,11 @@ public class PanierController {
             return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<Object> getCommandeType(@PathVariable Long idPanier){
+        return null;
+    }
+
 
     @PutMapping("/{idPanier}")
     public ResponseEntity<PanierDto> updatePanier(@PathVariable int idPanier, @RequestBody PresentationDto presentationDto){
