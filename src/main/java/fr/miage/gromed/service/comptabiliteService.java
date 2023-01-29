@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Stream;
 
+//TODO: Back-office: Gestion des comptes internes
 @Service
 public class comptabiliteService {
 
@@ -19,7 +20,7 @@ public class comptabiliteService {
         this.comptabiliteInterneRepository = comptabiliteInterneRepository;
     }
 
-    @Autowired
+    @Transactional
     public void populateComptabiliteInterne(){
         ComptabiliteParametres.getComptabiliteParameters().forEach(parameter -> {
             ComptabiliteInterne comptabiliteInterne = ComptabiliteInterne.builder()

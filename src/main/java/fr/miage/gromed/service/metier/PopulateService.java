@@ -5,6 +5,7 @@ import fr.miage.gromed.model.enums.NatureComposant;
 import fr.miage.gromed.model.enums.TypeAvis;
 import fr.miage.gromed.model.enums.ValeurAvis;
 import fr.miage.gromed.model.medicament.*;
+import fr.miage.gromed.repositories.ConditionPrescriptionRepository;
 import fr.miage.gromed.repositories.MedicamentRepository;
 import fr.miage.gromed.repositories.PresentationRepository;
 import fr.miage.gromed.repositories.StockRepository;
@@ -22,6 +23,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+//TODO: Parse et populate les etablissements, et es avis et les géneriques
+//todo: critères de recherche
 @Service
 public class PopulateService {
 
@@ -153,7 +156,8 @@ public class PopulateService {
                                 .prixDeBase(this.parseDouble(data.data.get("prix_base")))
                                 .honoraireRemboursement(this.parseDouble(data.data.get("honoraire")))
                                 .tauxRemboursement(data.data.get("taux_remboursement"))
-                                .isAgrement(Boolean.parseBoolean(data.data.get("agrement_collectivites")))
+//                                .isAgrement(Boolean.parseBoolean(data.data.get("agrement_collectivites")))
+                                .isAgrement(MedicalDataParser.booleanParser(data.data.get("agrement_collectivites")))
                                 .dateDeclaration(MedicalDataParser.strToDate(data.data.get("date_declaration_commercialisation"), false))
                                 .etatCommercialisation(data.data.get("etat_commercialisation"))
                                 .statutAdmin(data.data.get("statut_admin"))
@@ -187,7 +191,7 @@ public class PopulateService {
 
     private String sanitizeBool(String agrement_collectivites) {
         if (agrement_collectivites == null || agrement_collectivites.isEmpty()){
-            return "false";
+            return "non";
         }
         return agrement_collectivites;
     }
@@ -275,6 +279,7 @@ public class PopulateService {
 
      }
 
+     @Transactional
      public void populateInfos(){
         List<Medicament> medicaments = new ArrayList<>();
          medicalDataParser.initInfos("src/main/resources/data/CIS_InfoImportantes_20221019150103_bdpm.txt");
@@ -286,7 +291,7 @@ public class PopulateService {
                 if (medicamentOpt.isPresent()) {
                     Medicament medicament = medicamentOpt.get();
                     medicament.addInfo(data.data.get("lien_info"));
-                    medicamentRepository.save(medicament);
+//                    medicamentRepository.save(medicament);
                     medicaments.add(medicament);
                 }
             });
@@ -294,20 +299,22 @@ public class PopulateService {
 
     }
 
+    @Transactional
     public void populateUrls(){
-        List<Medicament> medicaments = new ArrayList<>();
+        List<Medicament> medicaments = medicamentRepository.findAll();
+        Map<Integer, Medicament> medicamentCisMap = medicaments.stream().collect(Collectors.toMap(Medicament::getCodeCIS, medicament -> medicament));
         medicalDataParser.initUrls("src/main/resources/data/urlsImages.csv");
         List<DataWrapper> list = medicalDataParser.parseUrls();
         list.forEach(data -> {
-            medicamentRepository.findByCodeCIS(
-                    Integer.parseInt(data.data.get("CIS"))).ifPresent(medicament ->
-                                { medicament.setUrlImage(data.data.get("url"));
-                                    medicaments.add(medicament);
-                                });
+            Medicament medicament = medicamentCisMap.get(Integer.parseInt(data.data.get("CIS")));
+            if (medicament != null) {
+                medicament.setUrlImage(data.data.get("url"));
+            }
         });
         medicamentRepository.saveAll(medicaments);
     }
 
+    @Transactional
     public void populateConditions(){
         List<Medicament> medicaments = new ArrayList<>();
 

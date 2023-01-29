@@ -2,10 +2,7 @@ package fr.miage.gromed.dto;
 
 import com.fasterxml.jackson.databind.annotation.JacksonStdImpl;
 import fr.miage.gromed.model.Panier;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.sql.Date;
@@ -20,9 +17,13 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JacksonStdImpl
-public class PanierDto {
+@Setter
+@Getter
+@Data
+public class PanierDto implements Serializable {
     private Long id;
     private List<PanierItemDto> items;
     private LocalDateTime dateCreation;
+
+
 }

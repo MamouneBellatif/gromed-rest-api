@@ -29,11 +29,14 @@ public class PresentationService {
     }
 
     public PresentationFicheDto getPresentationFiche(Long presentationCip) {
-        Optional<Presentation> presentationDto = presentationRepository.findByCodeCIP(presentationCip);
-        if (presentationDto.isEmpty()) {
-            throw new PresentationNotFoundException();
-        }
-        return presentationFicheMapper.toDto(presentationDto.get());
+        return presentationRepository.findByCodeCIP(presentationCip)
+                .map(presentationFicheMapper::toDto)
+                .orElseThrow(PresentationNotFoundException::new);
+//        Optional<Presentation> presentationDto = presentationRepository.findByCodeCIP(presentationCip);
+//        if (presentationDto.isEmpty()) {
+//            throw new PresentationNotFoundException();
+//        }
+//        return presentationFicheMapper.toDto(presentationDto.get());
     }
 
     public Page<PresentationDto> searchPresentation(String string, Pageable pageable){

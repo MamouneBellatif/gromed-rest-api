@@ -19,6 +19,10 @@ public class Stock {
     @Column(name = "stock_id", nullable = false)
     private Long id;
 
+    @OneToOne(mappedBy = "stock")
+    private Presentation presentation;
+
+
     @Column
     private int quantiteStockLogique;
 

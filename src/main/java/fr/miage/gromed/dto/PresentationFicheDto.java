@@ -14,9 +14,14 @@ import java.io.Serializable;
 public class PresentationFicheDto implements Serializable {
     private final Long codeCIP;
     private final String libelle;
+
+    private final String denomination;
     private final String medicamentDenomination;
     private final double prixDeBase;
     private final double honoraireRemboursement;
+
+    private final String imageUrl;
+    private final double stock;
 //    private final String statutAdmin;
 //    private final StockDto stock;
     private final String tauxRemboursement;

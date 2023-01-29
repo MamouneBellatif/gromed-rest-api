@@ -22,12 +22,14 @@ public class PresentationMapper implements EntityMapper<PresentationDto, Present
 
     @Override
     public PresentationDto toDto(Presentation entity) {
+        Medicament medicament = entity.getMedicament();
         return PresentationDto.builder().
                 codeCIP(entity.getCodeCIP())
                 .libelle(entity.getLibelle())
                 .prixDeBase(entity.getPrixDeBase())
+                .imageUrl(medicament.getUrlImage())
                 .honoraireRemboursement(entity.getHonoraireRemboursement())
-                .medicamentDenomination(entity.getMedicament().getDenomination())
+                .medicamentDenomination(medicament.getDenomination())
                 .build();
     }
 
