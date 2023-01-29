@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.miage.gromed.controller.PanierController;
 import fr.miage.gromed.dto.PanierDto;
 import fr.miage.gromed.dto.PanierItemDto;
-import fr.miage.gromed.service.PanierService;
+import fr.miage.gromed.service.metier.PanierService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

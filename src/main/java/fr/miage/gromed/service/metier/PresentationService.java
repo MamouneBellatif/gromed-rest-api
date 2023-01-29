@@ -1,4 +1,4 @@
-package fr.miage.gromed.service;
+package fr.miage.gromed.service.metier;
 
 import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.dto.PresentationFicheDto;

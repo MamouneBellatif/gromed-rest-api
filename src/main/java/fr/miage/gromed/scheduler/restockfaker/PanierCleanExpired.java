@@ -2,11 +2,10 @@ package fr.miage.gromed.scheduler.restockfaker;
 
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.repositories.PanierRepository;
-import fr.miage.gromed.service.PanierService;
-import fr.miage.gromed.service.StockService;
+import fr.miage.gromed.service.metier.PanierService;
+import fr.miage.gromed.service.metier.StockService;
 import jakarta.transaction.Transactional;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,15 +41,10 @@ public class PanierCleanExpired implements Runnable {
         if (this.idPanier != null) {
             LocalDateTime expirationDate = LocalDateTime.now().plusMinutes(30);
             Optional<Panier> panierOpt = panierRepository.findById(idPanier);
-            if (panierOpt.isPresent()) {
-                Panier panier = panierOpt.get();
-                panierService.resetStockLogique(panier);
-                panier.setExpired(true);
-                panierRepository.save(panier);
-//                panierRepository.delete(panier);
-            }
-            List<Panier> expiredCarts = panierRepository.findByDateCreationAfter(expirationDate);
-
-        }
+            panierOpt.ifPresent(panier -> {panierService.resetStockLogique(panier);
+                                           panier.setExpired(true);
+                                           panierRepository.save(panier);
+            });
+       }
     }
 }

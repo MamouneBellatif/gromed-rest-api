@@ -61,12 +61,15 @@ public class Medicament {
     @Column
     private String statutAdministratif;
 
+
     @Column
     private String numeroAutorisationEuro;
 
 //    @Column
 //    private String conditionsPrescription;
 
+    @Column
+    private String urlImage;
 
     @ElementCollection
     @Column(length=10000)

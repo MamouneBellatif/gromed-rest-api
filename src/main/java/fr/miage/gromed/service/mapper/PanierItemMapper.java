@@ -5,7 +5,6 @@ import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.PresentationRepository;
-import fr.miage.gromed.service.PresentationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

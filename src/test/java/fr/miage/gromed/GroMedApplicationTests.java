@@ -1,7 +1,7 @@
 package fr.miage.gromed;
 
 import fr.miage.gromed.controller.PresentationController;
-import fr.miage.gromed.service.MedicamentService;
+import fr.miage.gromed.service.metier.MedicamentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

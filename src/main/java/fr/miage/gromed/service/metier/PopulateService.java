@@ -1,4 +1,4 @@
-package fr.miage.gromed.service;
+package fr.miage.gromed.service.metier;
 
 import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.model.enums.NatureComposant;
@@ -14,8 +14,11 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.FileWriter;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,6 +78,48 @@ public class PopulateService {
             logger.info("###################");
         });
         medicamentRepository.saveAll(medicaments);
+    }
+
+    public void parseCisLibelle(){
+        medicalDataParser.initMedicament("src/main/resources/data/CIS_bdpm.txt");
+
+        List<DataWrapper> list = medicalDataParser.parseMedicament();
+        try {
+        FileWriter writer = new FileWriter("output.csv");
+
+            list.forEach(data -> {
+                System.out.println(data.data.get("CIS"));
+                //write in a file the cis and the denomination in a csv format
+
+                    String key = data.data.get("CIS");
+                    String value = data.data.get("denomination");
+                    String[] words = value.split(" ");
+//                    String firstWord = words[0];
+//                    try {
+//                        writer.write(key + "," + value + "\n");
+                    String firstPart = getFirstPart(value);
+                    try {
+                    writer.write(key + "," + firstPart + "\n");
+                    } catch (Exception e) {
+                        System.out.println("An error occurred.");
+                        e.printStackTrace();
+                    }
+
+            }); writer.flush();
+            writer.close();
+        } catch (Exception e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+    private static String getFirstPart(String value) {
+        Pattern pattern = Pattern.compile("^([^,]+),(\\d+\\.\\d+|\\d+)");
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return matcher.group(1);
+        } else {
+            return value.split(",")[0];
+        }
     }
 
         //use medicalDataParser to parse CIS_CIP_bdpm.txt and save the result in the database accordingly to the model using medicamentRepository CIS as foreign key
@@ -247,6 +292,20 @@ public class PopulateService {
             });
          medicamentRepository.saveAll(medicaments);
 
+    }
+
+    public void populateUrls(){
+        List<Medicament> medicaments = new ArrayList<>();
+        medicalDataParser.initUrls("src/main/resources/data/urlsImages.csv");
+        List<DataWrapper> list = medicalDataParser.parseUrls();
+        list.forEach(data -> {
+            medicamentRepository.findByCodeCIS(
+                    Integer.parseInt(data.data.get("CIS"))).ifPresent(medicament ->
+                                { medicament.setUrlImage(data.data.get("url"));
+                                    medicaments.add(medicament);
+                                });
+        });
+        medicamentRepository.saveAll(medicaments);
     }
 
     public void populateConditions(){

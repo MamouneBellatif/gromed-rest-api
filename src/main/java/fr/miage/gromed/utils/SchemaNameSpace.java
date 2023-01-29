@@ -12,7 +12,8 @@ public enum SchemaNameSpace {
     AVIS_ASMR("avis_asmr"),
 
     AVIS_SMR("avis_smr"),
-    CONDITION_PRESCRIPTION("conditions");
+    CONDITION_PRESCRIPTION("conditions"),
+    URL("url");
 
 
 
