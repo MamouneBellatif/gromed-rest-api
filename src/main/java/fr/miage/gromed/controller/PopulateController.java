@@ -26,7 +26,10 @@ public class PopulateController {
     public String populateAll(){
         populateService.populateMedicament();
         populateService.populatePresCached();
+        populateService.populateComposantCached();
         populateService.initStock();
+        populateService.populateUrls();
+        populateService.populateAvis();
         return "pres populate";
     }
 
@@ -43,7 +46,7 @@ public class PopulateController {
 
     @GetMapping("/populateCond")
     public String populateCond(){
-//        populateService.populateConditions();
+        populateService.populateConditions();
         return "cond populate";
     }
 
@@ -55,7 +58,7 @@ public class PopulateController {
 
     @GetMapping("/populateInfo")
     public String populateInfo(){
-//        populateService.populateInfos();
+        populateService.populateInfos();
         return "info populate";
     }
 

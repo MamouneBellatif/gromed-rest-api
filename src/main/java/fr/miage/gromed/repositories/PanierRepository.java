@@ -17,7 +17,10 @@ import java.util.List;
 public interface PanierRepository extends JpaRepository<Panier, Long> {
     List<Panier> findByDateCreationAfter(LocalDateTime expirationTime);
 
-    Optional<Panier> findById(Long idPanier);
-
     Panier findByItemsId(Long idItem);
+
+//    List<Panier> findAllByDateExpirationAfter(LocalDateTime now);
+    List<Panier> findAllByExpiresAtAfterAndExpired(LocalDateTime now, boolean expired);
+
+    List<Panier> findByClientId(Long idUser);
 }

@@ -1,5 +1,6 @@
 package fr.miage.gromed.controller;
 
+import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.repositories.PresentationRepository;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(path="/api/presentation/",produces = MediaType.APPLICATION_JSON_VALUE)
 public class PresentationController {
+
+    public static final String ERREUR_INTERNE = "Erreur interne";
 
     private final PresentationService presentationService;
 
@@ -35,14 +39,24 @@ public class PresentationController {
         return ResponseEntity.ok(presentationPage);
     }
 
-    @GetMapping(value = "/{idPresentation}",
+    @GetMapping(value = "/fiche/{idPresentation}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getPresentation(@PathVariable Long idPresentation) {
         try {
             var presentationFicheDto = presentationService.getPresentationFiche(idPresentation);
-            return ResponseEntity.ok(presentationFicheDto);
+            return ResponseHandler.generateResponse("Presentation de la fiche", HttpStatus.OK,presentationFicheDto);
         } catch (PresentationNotFoundException pe) {
-            return ResponseEntity.notFound().build();
+            return ResponseHandler.generateFailureResponse(pe.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @ExceptionHandler(PresentationNotFoundException.class)
+    public ResponseEntity<Object> handlePresentationNotFoundException(PresentationNotFoundException e) {
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleException(Exception e) {
+        return ResponseHandler.generateFailureResponse(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

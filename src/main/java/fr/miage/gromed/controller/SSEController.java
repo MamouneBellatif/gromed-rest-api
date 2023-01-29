@@ -15,6 +15,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 import org.springframework.http.HttpStatus;
+//TODO: abonnement mis a jour de sock
+
 @RestController
 @CrossOrigin
 public class SSEController {

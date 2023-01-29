@@ -1,7 +1,7 @@
 package fr.miage.gromed.exceptions;
 
 public class StockIndisponibleException extends RuntimeException{
-    public StockIndisponibleException() {
-        super("alerte_panier");
+    public StockIndisponibleException(long CIP, int quantite) {
+        super("alerte_panier; CIP:" + CIP + "; quantite:" + quantite);
     }
 }

@@ -11,6 +11,7 @@ import fr.miage.gromed.service.metier.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+//TODO: delivrer lors du paiement et lors de la disponibilité du stock d'une commande a moitiée livrée
 @Component
 public class mockDeliverer {
 

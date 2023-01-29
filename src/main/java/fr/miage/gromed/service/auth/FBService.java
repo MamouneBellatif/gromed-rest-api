@@ -6,19 +6,20 @@ import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
+import java.io.FileInputStream;
 
-//@Service
-public class FBservice {
+
+@Service
+public class FBService {
 
         @PostConstruct
         public void initialize() {
             try {
-                // FileInputStream serviceAccount = new FileInputStream(
-                //         "src/main/java/com/example/service/integrateur2022g5-firebase-adminsdk-5ncvw-49a213bd7a.json");
+                FileInputStream serviceAccount =
+                        new FileInputStream("src/main/resources/gromed-3c731-firebase-adminsdk-sxq2j-861bc4baab.json");
 
                 FirebaseOptions options = new FirebaseOptions.Builder()
-                        // .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .setCredentials(GoogleCredentials.getApplicationDefault())
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .build();
 
                 FirebaseApp.initializeApp(options);

@@ -22,7 +22,7 @@ public class PanierItem {
     @Column(nullable = false)
     private int quantite;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id")
     private Presentation presentation;
 

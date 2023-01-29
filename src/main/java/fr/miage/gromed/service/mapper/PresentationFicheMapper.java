@@ -1,6 +1,8 @@
 package fr.miage.gromed.service.mapper;
 
+import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.dto.PresentationFicheDto;
+import fr.miage.gromed.model.medicament.Medicament;
 import fr.miage.gromed.model.medicament.Presentation;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +21,17 @@ public class PresentationFicheMapper implements EntityMapper<PresentationFicheDt
 
     @Override
     public PresentationFicheDto toDto(Presentation entity) {
-        return null;
+        Medicament medicament = entity.getMedicament();
+        return PresentationFicheDto.builder().
+                codeCIP(entity.getCodeCIP())
+                .libelle(entity.getLibelle())
+                .denomination(medicament.getDenomination())
+                .prixDeBase(entity.getPrixDeBase())
+                .imageUrl(medicament.getUrlImage())
+                .stock(entity.getStock().getQuantiteStockLogique())
+                .honoraireRemboursement(entity.getHonoraireRemboursement())
+                .medicamentDenomination(medicament.getDenomination())
+                .build();
     }
 
     @Override

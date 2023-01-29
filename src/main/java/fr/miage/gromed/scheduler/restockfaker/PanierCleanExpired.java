@@ -6,6 +6,7 @@ import fr.miage.gromed.service.metier.PanierService;
 import fr.miage.gromed.service.metier.StockService;
 import jakarta.transaction.Transactional;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,18 +19,14 @@ public class PanierCleanExpired implements Runnable {
 
     Logger log = Logger.getLogger(PanierCleanExpired.class.getName());
 
-    private StockService stockService;
-
-    private PanierService panierService;
-
-    private PanierRepository panierRepository;
-
+    @Autowired
+    private  StockService stockService;
+//
 //    @Autowired
-    public PanierCleanExpired(StockService stockService, PanierService panierService) {
-        this.stockService = stockService;
-        this.panierService = panierService;
-        this.panierRepository = panierRepository;
-    }
+//    private PanierService panierService;
+
+    @Autowired
+    private  PanierRepository panierRepository;
 
     @Setter
     private Long idPanier;
@@ -39,9 +36,10 @@ public class PanierCleanExpired implements Runnable {
     @Transactional
     public void run() {
         if (this.idPanier != null) {
-            LocalDateTime expirationDate = LocalDateTime.now().plusMinutes(30);
+//            LocalDateTime expirationDate = LocalDateTime.now().plusMinutes(30);
+//            List<Panier> expiredPaniers = panierRepository.findAllByDateExpirationAfter(LocalDateTime.now());
             Optional<Panier> panierOpt = panierRepository.findById(idPanier);
-            panierOpt.ifPresent(panier -> {panierService.resetStockLogique(panier);
+            panierOpt.ifPresent(panier -> {stockService.resetStockLogique(panier);
                                            panier.setExpired(true);
                                            panierRepository.save(panier);
             });
