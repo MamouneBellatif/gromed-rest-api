@@ -19,6 +19,7 @@ public class MedicamentAvis {
 
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "medicament_avis_id", nullable = false)
     private Long id;
 
@@ -34,7 +35,7 @@ public class MedicamentAvis {
     @Enumerated(EnumType.STRING)
     private ValeurAvis valeur;
 
-    @Column
+    @Column(length = 4000)
     private String libelle;
 
     //Discriminant type enum, on évite l'héritage
