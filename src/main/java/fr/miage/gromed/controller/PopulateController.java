@@ -29,6 +29,7 @@ public class PopulateController {
         populateService.populateComposantCached();
         populateService.initStock();
         populateService.populateUrls();
+//        populateService.populateInfos();
         populateService.populateAvis();
         return "pres populate";
     }

@@ -67,7 +67,8 @@ public class PopulateService {
                             .dateAMM(MedicalDataParser.strToDate(data.data.get("date_AMM"), false))
                             .isSurveillanceRenforcee(Boolean.parseBoolean(data.data.get("surveillance_renforcee")))
                             .typeProcedureAMM(data.data.get("type_procedure_AMM"))
-                            .statutBDM(data.data.get("statut_BDM"))
+                    .informationImportantesHtmlAnchor(new HashSet<String>())
+                    .statutBDM(data.data.get("statut_BDM"))
                             .composantList(new HashSet<ComposantSubtance>())
                             .presentationList(new HashSet<Presentation>())
                             .groupeGeneriqueList(new HashSet<GroupeGenerique>())
@@ -255,46 +256,46 @@ public class PopulateService {
         medicalDataParser.initAvisASMR("src/main/resources/data/CIS_HAS_ASMR_bdpm.txt");
         medicalDataParser.initAvisSMR("src/main/resources/data/CIS_HAS_SMR_bdpm.txt");
 
-         Map<Integer,Medicament> fetchedMedicaments = medicamentRepository.findAll().stream().collect(Collectors.toMap(Medicament::getCodeCIS, medicament -> medicament));
-         List<Medicament> medicaments = new ArrayList<>();
+         List<Medicament> medicaments = medicamentRepository.findAll();
+         List<MedicamentAvis> avisList = new ArrayList<>();
+         Map<Integer, Medicament> medicamentCisMap = medicaments.stream().collect(Collectors.toMap(Medicament::getCodeCIS, medicament -> medicament));
 
         List<DataWrapper> resultAsmr = medicalDataParser.parseASMR();
         resultAsmr.forEach(data -> data.data.put("type_avis", "ASMR"));
         List<DataWrapper> resultSmr = medicalDataParser.parseSMR();
         resultSmr.forEach(data -> data.data.put("type_avis", "SMR"));
-        resultAsmr.addAll(resultSmr);
+//        resultAsmr.addAll(resultSmr);
         Stream.concat(resultSmr.stream(), resultAsmr.stream()).forEach(data -> {
-            Medicament medicament = fetchedMedicaments.get(Integer.parseInt(data.data.get("CIS")));
+            Medicament medicament = medicamentCisMap.get(Integer.parseInt(data.data.get("CIS")));
+            if (medicament != null) {
             MedicamentAvis avisSMR = MedicamentAvis.builder()
                          .dateAvis(MedicalDataParser.strToDate(data.data.get("date_avis"), true))
                          .codeDossier(data.data.get("code_dossier"))
                          .motif(data.data.get("motif_evaluation"))
                          .valeur(ValeurAvis.fromString(data.data.get("valeur")))
                          .libelle(data.data.get("libelle"))
-                         .typeAvisEnum(TypeAvis.SMR).build();
+                         .typeAvisEnum(TypeAvis.fromString(data.data.get("type_avis"))).build();
                  medicament.addAvis(avisSMR);
                  medicaments.add(medicament);
+                 avisList.add(avisSMR);
+            }
          });
+
              medicamentRepository.saveAll(medicaments);
 
      }
 
      @Transactional
      public void populateInfos(){
-        List<Medicament> medicaments = new ArrayList<>();
-         medicalDataParser.initInfos("src/main/resources/data/CIS_InfoImportantes_20221019150103_bdpm.txt");
+         List<Medicament> medicaments = medicamentRepository.findAll();
+         Map<Integer, Medicament> medicamentCisMap = medicaments.stream().collect(Collectors.toMap(Medicament::getCodeCIS, medicament -> medicament));         medicalDataParser.initInfos("src/main/resources/data/CIS_InfoImportantes_20221019150103_bdpm.txt");
             List<DataWrapper> list = medicalDataParser.parseInfos();
             list.forEach(data -> {
-                Optional<Medicament> medicamentOpt;
-                medicamentOpt = medicamentRepository.findByCodeCIS(
-                        Integer.parseInt(data.data.get("CIS")));
-                if (medicamentOpt.isPresent()) {
-                    Medicament medicament = medicamentOpt.get();
+                Medicament medicament = medicamentCisMap.get(Integer.parseInt(data.data.get("CIS")));
                     medicament.addInfo(data.data.get("lien_info"));
-//                    medicamentRepository.save(medicament);
                     medicaments.add(medicament);
                 }
-            });
+            );
          medicamentRepository.saveAll(medicaments);
 
     }
