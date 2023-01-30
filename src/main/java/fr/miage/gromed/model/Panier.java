@@ -3,10 +3,10 @@ package fr.miage.gromed.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.sql.Date;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Set;
+
 @Setter
 @Getter
 @Builder
@@ -21,20 +21,25 @@ public class Panier implements AbstractEntity<Long> {
 
 
 
-    @OneToMany
-    @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
-    private List<PanierItem> items;
+//    @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
+    @OneToMany(mappedBy="panier", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PanierItem> items;
 
     //date with hour and minute
-    @Column
-    @Temporal(TemporalType.TIMESTAMP)
-    private Timestamp dateCreation;
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime expiresAt;
+
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime dateCreation;
 
     @Column
     private boolean isPaid;
 
     @Column
-    private boolean isExpired;
+    private boolean isCanceled;
+
+    @Column
+    private boolean expired;
 
     @ManyToOne
     @JoinColumn(name = "user_id_fk", referencedColumnName = "user_id")
@@ -44,6 +49,7 @@ public class Panier implements AbstractEntity<Long> {
     @Column
     private Date datePaiement;
 
+
     @Column
     private Date dateLivraison;
 
@@ -51,7 +57,13 @@ public class Panier implements AbstractEntity<Long> {
     private String adresseLivraison;
 
     @Column
+    private boolean isShipped;
+
+    @Column
     private boolean isDelivered;
+
+    @Column
+    private boolean delayed;
 
     public void addItem(PanierItem item) {
         this.items.add(item);
@@ -63,4 +75,5 @@ public class Panier implements AbstractEntity<Long> {
     public Long getId() {
         return id;
     }
+
 }

@@ -94,4 +94,11 @@ public class ParseTest {
             });
         });
     }
+
+    @Test
+    void parseUrls(){
+        dp.initUrls("src/main/resources/data/urlsImages.csv");
+        List<DataWrapper> result = dp.parseUrls();
+        iterateResult(result, "######################");
+    }
 }

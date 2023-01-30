@@ -61,15 +61,18 @@ public class Medicament {
     @Column
     private String statutAdministratif;
 
+
     @Column
     private String numeroAutorisationEuro;
 
 //    @Column
 //    private String conditionsPrescription;
 
+    @Column(name = "url_image", length = 4000)
+    private String urlImage;
 
     @ElementCollection
-    @Column(length=10000)
+    @Column(name="url_info", length = 4000)
     private Set<String> informationImportantesHtmlAnchor;
 
     @ManyToOne(cascade = CascadeType.ALL)

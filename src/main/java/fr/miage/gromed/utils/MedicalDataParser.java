@@ -15,7 +15,8 @@ import java.util.logging.Logger;
 public class MedicalDataParser {
 
     private static final String NEWLINE = "\n";
-    private static final String SEPARATOR = "\t";
+    private static final String TCV_SEPARATOR = "\t";
+    private static final String CSV_SEPARATOR = ";";
     Logger log = Logger.getLogger(MedicalDataParser.class.getName());
     Map<SchemaNameSpace, String[]> dbSchema = new HashMap<>();
     Map<SchemaNameSpace, String> fileContent = new HashMap<>();
@@ -29,12 +30,12 @@ public class MedicalDataParser {
                 "CIS",
                 "type_generique"
         });
-        initFileContent(SchemaNameSpace.GROUPE_GENERIQUE, path);
+        initFileContent(SchemaNameSpace.GROUPE_GENERIQUE, path, false);
         isInit.put(SchemaNameSpace.GROUPE_GENERIQUE, true);
     }
 
     public List<DataWrapper> parseGenerique(){
-        return this.parse(SchemaNameSpace.GROUPE_GENERIQUE);
+        return this.parse(SchemaNameSpace.GROUPE_GENERIQUE, false);
     }
 
 
@@ -50,7 +51,7 @@ public class MedicalDataParser {
                 "nature_composant",
                 "numero_liaison_sa_ft"
         });
-        initFileContent(SchemaNameSpace.COMPOSANT, composantPath);
+        initFileContent(SchemaNameSpace.COMPOSANT, composantPath, false);
         isInit.put(SchemaNameSpace.COMPOSANT, true);
     }
 
@@ -61,12 +62,12 @@ public class MedicalDataParser {
             "date_fin",
             "lien_info"
         });
-        initFileContent(SchemaNameSpace.INFOS, path);
+        initFileContent(SchemaNameSpace.INFOS, path, false);
         isInit.put(SchemaNameSpace.INFOS, true);
     }
 
     public List<DataWrapper> parseInfos(){
-        return parse(SchemaNameSpace.INFOS);
+        return parse(SchemaNameSpace.INFOS, false);
     }
 
     public void initPresentation(String presentationPath){
@@ -86,7 +87,7 @@ public class MedicalDataParser {
                 "honoraire",
                 "indications_remboursement"
         });
-        initFileContent(ns, presentationPath);
+        initFileContent(ns, presentationPath, false);
         isInit.put(ns,true);
     }
     public void initAvisASMR(String avisPathASMR){
@@ -98,16 +99,16 @@ public class MedicalDataParser {
                 "valeur",
                 "libelle",
         });
-        initFileContent(SchemaNameSpace.AVIS_ASMR, avisPathASMR);
+        initFileContent(SchemaNameSpace.AVIS_ASMR, avisPathASMR, false);
         isInit.put(SchemaNameSpace.AVIS_ASMR,true);
     }
 
     public List<DataWrapper> parseASMR(){
-        return this.parse(SchemaNameSpace.AVIS_ASMR);
+        return this.parse(SchemaNameSpace.AVIS_ASMR, false);
     }
 
     public List<DataWrapper> parseSMR(){
-        return this.parse(SchemaNameSpace.AVIS_SMR);
+        return this.parse(SchemaNameSpace.AVIS_SMR, false);
     }
 
 
@@ -120,7 +121,7 @@ public class MedicalDataParser {
                 "valeur",
                 "libelle",
         });
-        initFileContent(SchemaNameSpace.AVIS_SMR, avisPathSMR);
+        initFileContent(SchemaNameSpace.AVIS_SMR, avisPathSMR, false);
         isInit.put(SchemaNameSpace.AVIS_SMR,true);
     }
 
@@ -129,15 +130,26 @@ public class MedicalDataParser {
                 "CIS",
                 "condition"
         });
-        initFileContent(SchemaNameSpace.CONDITION_PRESCRIPTION, conditionPath);
+        initFileContent(SchemaNameSpace.CONDITION_PRESCRIPTION, conditionPath, false);
         isInit.put(SchemaNameSpace.CONDITION_PRESCRIPTION,true);
     }
 
     public List<DataWrapper> parseConditionPrescription(){
-        return this.parse(SchemaNameSpace.CONDITION_PRESCRIPTION);
+        return this.parse(SchemaNameSpace.CONDITION_PRESCRIPTION, false);
     }
 
+    public void initUrls(String urlPath){
+        dbSchema.put(SchemaNameSpace.URL, new String[]{
+                "CIS",
+                "url"
+        });
+        initFileContent(SchemaNameSpace.URL, urlPath, true);
+        isInit.put(SchemaNameSpace.URL,true);
+    }
 
+    public List<DataWrapper> parseUrls(){
+        return this.parse(SchemaNameSpace.URL, true);
+    }
 
     public void initMedicament(String medicamentPath) {
         dbSchema.put(SchemaNameSpace.MEDICAMENT, new String[]{
@@ -154,27 +166,27 @@ public class MedicalDataParser {
                 "titulaires",
                 "surveillance_renforcee"
         });
-        initFileContent(SchemaNameSpace.MEDICAMENT, medicamentPath);
+        initFileContent(SchemaNameSpace.MEDICAMENT, medicamentPath, false);
         isInit.put(SchemaNameSpace.MEDICAMENT,true);
     }
 
     public List<DataWrapper> parsePresentation(){
-        return this.parse(SchemaNameSpace.PRESENTATION);
+        return this.parse(SchemaNameSpace.PRESENTATION, false);
     }
 
     public List<DataWrapper> parseComposants(){
-        return this.parse(SchemaNameSpace.COMPOSANT);
+        return this.parse(SchemaNameSpace.COMPOSANT, false);
     }
-    private void initFileContent(SchemaNameSpace fileType, String filePath){
+    private void initFileContent(SchemaNameSpace fileType, String filePath, boolean isCsv){
         try {
             var file = new FileInputStream(new File(filePath));
-            fileContent.put(fileType,FileHelper.readFromInputStream(file));
+            fileContent.put(fileType,FileHelper.readFromInputStream(file, !isCsv));
         }catch (Exception e) {
             log.warning("Fichier de présentation non trouvé");
         }
     }
-    private DataWrapper parseLine(SchemaNameSpace namespace, String line) {
-        String[] values = line.split(SEPARATOR);
+    private DataWrapper parseLine(SchemaNameSpace namespace, String line, boolean isCsv) {
+        String[] values = line.split(isCsv?CSV_SEPARATOR:TCV_SEPARATOR);
         String[] schema = dbSchema.get(namespace);
         Map<String, String> data = new LinkedHashMap<>();
         for (int i = 0; i < schema.length && i < values.length; i++) {
@@ -203,23 +215,22 @@ public class MedicalDataParser {
 
 
     public List<DataWrapper> parseMedicament(){
-        return this.parse(SchemaNameSpace.MEDICAMENT);
+        return this.parse(SchemaNameSpace.MEDICAMENT, false);
     }
 
-    public List<DataWrapper> parse(SchemaNameSpace namespace){
+    public List<DataWrapper> parse(SchemaNameSpace namespace, boolean isCsv){
         if (!(isInit.containsKey(namespace) && isInit.get(namespace))){
             return null;
         }
         String[] lines = this.fileContent.get(namespace).split(NEWLINE);
         ArrayList<DataWrapper> result = new ArrayList<>();
-        Arrays.stream(lines).forEach(line -> result.add(parseLine(namespace, this.trimEnd(line))));
+        Arrays.stream(lines).forEach(line -> result.add(parseLine(namespace, this.trimEnd(line), isCsv)));
         return result;
     }
 
-    private Object booleanParser(String value) {
+    public static Boolean booleanParser(String value) {
         if (value.equalsIgnoreCase("non")) return false;
-        if (value.equalsIgnoreCase("oui")) return true;
-        return value;
+        return value.equalsIgnoreCase("oui");
     }
 
     private Object integerParser(String value) {
@@ -247,17 +258,17 @@ public class MedicalDataParser {
     }
 
     public List<DataWrapper> parseComposant() {
-        return this.parse(SchemaNameSpace.COMPOSANT);
+        return this.parse(SchemaNameSpace.COMPOSANT, false);
     }
 
 
 
     private static class FileHelper {
-        private static String readFromInputStream(InputStream inputStream)
+        private static String readFromInputStream(InputStream inputStream, boolean reEncode)
                 throws IOException {
             StringBuilder resultStringBuilder = new StringBuilder();
             try (BufferedReader br
-                         = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("windows-1252")))) {
+                         = new BufferedReader(new InputStreamReader(inputStream, Charset.forName(reEncode?"windows-1252":"UTF-8")))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     resultStringBuilder.append(line).append(NEWLINE);

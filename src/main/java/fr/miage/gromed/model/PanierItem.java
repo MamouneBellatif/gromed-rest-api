@@ -2,9 +2,7 @@ package fr.miage.gromed.model;
 
 import fr.miage.gromed.model.medicament.Presentation;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +10,9 @@ import java.util.Map;
 @Entity
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PanierItem {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -21,22 +22,19 @@ public class PanierItem {
     @Column(nullable = false)
     private int quantite;
 
-    @OneToOne
-    @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
-    private Panier panier;
-
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "presentation_id_fk", referencedColumnName = "presentation_id")
     private Presentation presentation;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Panier panier;
+
+    //Nombre livré de cet item pour la commande
+    @Column
     private int delivree;
 
-    public PanierItem(Presentation presentation, int quantity) {
-        this.presentation = presentation;
-        this.quantite = quantity;
-    }
 
-    public PanierItem() {
+    @Column
+    private boolean delayed;
 
-    }
 }

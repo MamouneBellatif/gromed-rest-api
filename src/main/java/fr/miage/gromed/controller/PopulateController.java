@@ -1,6 +1,6 @@
 package fr.miage.gromed.controller;
 
-import fr.miage.gromed.service.PopulateService;
+import fr.miage.gromed.service.metier.PopulateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,14 +16,29 @@ public class PopulateController {
         return "medicaments has been populated";
     }
 
+    @GetMapping("/getCsv")
+     public String populatePresentation() {
+        populateService.parseCisLibelle();
+        return "fichier generé";
+    }
+
     @GetMapping("/populate")
     public String populateAll(){
-//        populateService.populateMedicament();
-//        populateService.populatePresCached();
-//        populateService.initStock();
+        populateService.populateMedicament();
+        populateService.populatePresCached();
+        populateService.populateComposantCached();
+        populateService.initStock();
+        populateService.populateUrls();
+//        populateService.populateInfos();
+        populateService.populateAvis();
         return "pres populate";
     }
 
+    @GetMapping("populUrls")
+    public String populateUrls(){
+        populateService.populateUrls();
+        return "urls populate";
+    }
     @GetMapping("/populateCompCache")
     public String populateSubsCache(){
 //        populateService.populateComposantCached();
@@ -32,7 +47,7 @@ public class PopulateController {
 
     @GetMapping("/populateCond")
     public String populateCond(){
-//        populateService.populateConditions();
+        populateService.populateConditions();
         return "cond populate";
     }
 
@@ -44,7 +59,7 @@ public class PopulateController {
 
     @GetMapping("/populateInfo")
     public String populateInfo(){
-//        populateService.populateInfos();
+        populateService.populateInfos();
         return "info populate";
     }
 
@@ -53,5 +68,7 @@ public class PopulateController {
 //        populateService.populateAvis();
         return "avis populate";
     }
+
+    
 
 }
