@@ -130,6 +130,16 @@
 			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.github.navidjalali</groupId>
+			<artifactId>firebaseauth_2.13</artifactId>
+			<version>0.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-credentials</artifactId>
+			<version>1.15.0</version>
+		</dependency>
 
 
 	</dependencies>

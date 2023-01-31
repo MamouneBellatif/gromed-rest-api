@@ -19,7 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path="/api/presentation/",produces = MediaType.APPLICATION_JSON_VALUE)
 public class PresentationController {
@@ -38,7 +38,7 @@ public class PresentationController {
 
     @GetMapping(value = "/{searchQuery}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PresentationDto>> searchByString(@RequestHeader("Authorization") String jwt, @PathVariable String searchQuery, @PageableDefault(sort = "libelle", size = 10) Pageable pageable) throws FirebaseAuthException {
+    public ResponseEntity<Page<PresentationDto>> searchByString( @PathVariable String searchQuery, @PageableDefault(sort = "libelle", size = 10) Pageable pageable) throws FirebaseAuthException {
 //        FirebaseAuth.getInstance().verifyIdToken(jwt);
         var presentationPage = presentationService.searchPresentation(searchQuery,pageable);
         return ResponseEntity.ok(presentationPage);
