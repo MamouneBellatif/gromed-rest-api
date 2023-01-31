@@ -23,24 +23,7 @@ import org.springframework.stereotype.Component;
 public class AuthFilter implements Filter {
 
 Logger logger = Logger.getLogger(AuthFilter.class.getName());
-//@Autowired
-//private FBinit fbinit;
 
-
-//    try{
-//                FileInputStream serviceAccount =
-//                        new FileInputStream("src/main/resources/gromed-3c731-firebase-adminsdk-sxq2j-4582cb1de5.json");
-//
-//                FirebaseOptions options = new FirebaseOptions.Builder()
-//                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-////                        .setDatabaseUrl("https://gromed-3c731-default-rtdb.europe-west1.firebasedatabase.app")
-//                        .build();
-//
-//                FirebaseApp.initializeApp(options);
-//                logger.info("Firebase initialized" + FirebaseApp.getInstance().toString());
-//    }catch (Exception e) {
-//        e.printStackTrace();
-//    }
 
 
     @Override
@@ -48,6 +31,16 @@ Logger logger = Logger.getLogger(AuthFilter.class.getName());
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 //        String idToken = httpRequest.getHeader("Authorization");
+        httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+        httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
+        httpResponse.setHeader("Access-Control-Max-Age", "3600");
+
+        if (httpRequest.getMethod().equals("OPTIONS")) {
+            httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
+            httpResponse.setHeader("Access-Control-Allow-Headers", "*");
+            chain.doFilter(request, response);
+            return;
+        }
         String idToken = httpRequest.getHeader("uid");
         logger.info("idToken : " + idToken);
 //        if (idToken == null || !idToken.startsWith("Bearer ")) {
