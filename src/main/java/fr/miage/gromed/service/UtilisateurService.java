@@ -1,16 +1,17 @@
 package fr.miage.gromed.service;
 
-import fr.miage.gromed.dto.UtilisateurDto;
-import fr.miage.gromed.exceptions.IncompleteUtilisateurException;
-import fr.miage.gromed.exceptions.UtilisateurInexistantException;
+import com.google.firebase.auth.UserRecord;
 import fr.miage.gromed.model.Utilisateur;
+import fr.miage.gromed.model.enums.PerimetreUtilisateur;
 import fr.miage.gromed.repositories.UtilisateurRepository;
+import fr.miage.gromed.service.auth.UserContextHolder;
 import fr.miage.gromed.service.mapper.UtilisateurMapper;
+import fr.miage.gromed.service.metier.PanierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
+import java.util.logging.Logger;
 
 @Service
 public class UtilisateurService {
@@ -24,20 +25,45 @@ public class UtilisateurService {
         this.utilisateurMapper = utilisateurMapper;
     }
 
+    @Autowired
+    private PanierService panierService;
 
-//    public String checkUser(Principal principal) {
-//        return principal.getName();
-//    }
-//        return utilisateurRepository.findById(principal.getId()).map(utilisateurMapper::toDto).orElse(
-//                      utilisateurMapper.toDto(utilisateurRepository.save(Utilisateur.builder().id(id).build()))
-
-
-    private UtilisateurDto register(String id){
-        return null;
+    @Transactional
+    public Utilisateur syncUser(UserRecord userRecord, String route) {
+        Utilisateur user = utilisateurRepository.findById(userRecord.getUid()).orElse(registerUtilisateur(userRecord));
+        if (user.isAwaitingResponse() && !route.contains("resolve")) {
+            user.setAwaitingResponse(false);
+//            panierService.getCurrentPanier()
+        }
+        return user;
     }
 
+    private Utilisateur registerUtilisateur(UserRecord userFB){
+        return Utilisateur.builder()
+                .id(userFB.getUid())
+                .nom(userFB.getDisplayName())
+                .email(userFB.getEmail())
+                .isBuying(false)
+                .awaitingResponse(false)
+                .perimetre(PerimetreUtilisateur.FRONT_OFFICE)
+                .build();
+    }
+
+    public void setBuying(){
+        utilisateurRepository.setBuying(true);
+    }
 
     public Object login(String uid) {
                           return null;
+    }
+    Logger logger = Logger.getLogger(UtilisateurService.class.getName());
+    public void await() {
+
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+//        if (utilisateur != null && !utilisateur.isAwaitingResponse() && utilisateur.isBuying()) {
+        if (utilisateur != null && !utilisateur.isAwaitingResponse() ) {
+            utilisateur.setAwaitingResponse(true);
+            logger.info("StockIndisponible pour l'utilisateur " + utilisateur.getId());
+        }
     }
 }

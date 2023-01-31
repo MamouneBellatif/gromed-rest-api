@@ -39,6 +39,9 @@ public class Panier implements AbstractEntity<Long> {
     private boolean isCanceled;
 
     @Column
+    private boolean awaitingResponse;
+
+    @Column
     private boolean expired;
 
     @ManyToOne
@@ -46,8 +49,8 @@ public class Panier implements AbstractEntity<Long> {
     private Utilisateur client;
 
     //    @Temporal(TemporalType.TIMESTAMP)
-    @Column
-    private Date datePaiement;
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime datePaiement;
 
 
     @Column

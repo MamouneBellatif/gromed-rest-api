@@ -33,6 +33,8 @@ public class PanierItem {
     @Column
     private int delivree;
 
+    @Column
+    private boolean conflict;
 
     @Column
     private boolean delayed;

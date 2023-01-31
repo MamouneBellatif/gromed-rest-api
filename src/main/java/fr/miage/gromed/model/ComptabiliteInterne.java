@@ -1,7 +1,6 @@
 package fr.miage.gromed.model;
 
 import fr.miage.gromed.model.enums.ComptabiliteParametres;
-import fr.miage.gromed.service.listeners.ComptabiliteListener;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,13 +10,13 @@ import lombok.*;
 @NoArgsConstructor
 @Setter
 @Getter
-@EntityListeners(ComptabiliteListener.class)
 public class ComptabiliteInterne {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(unique = true)
     @Enumerated(EnumType.STRING)
     private ComptabiliteParametres parametre;
 

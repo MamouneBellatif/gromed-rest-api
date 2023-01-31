@@ -34,4 +34,10 @@ public class Utilisateur {
     @Enumerated(EnumType.STRING)
     private PerimetreUtilisateur perimetre;
 
+    @Column
+    private boolean awaitingResponse;
+
+    @Column
+    private boolean isBuying;
+
 }

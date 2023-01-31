@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 @Service
 public class StockService {
@@ -70,8 +71,11 @@ public class StockService {
         });
     }
 
+    Logger logger = Logger.getLogger(StockService.class.getName());
+
     @Scheduled(fixedRate = 30, timeUnit = TimeUnit.MINUTES)
     public void cleanExpiredCarts() {
+        logger.info("Cleaning expired carts");
         List<Panier> expiredCarts = panierRepository.findAllByExpiresAtAfterAndExpired(LocalDateTime.now(), false);
         this.resetStockLogique(expiredCarts);
         expiredCarts.forEach(panier -> {
@@ -80,20 +84,4 @@ public class StockService {
         });
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void addToPanier(Long panierId, Presentation presentation, int quantity) {
-        Stock stock = presentation.getStock();
-        if (stock.getQuantiteStockLogique() < quantity) {
-            throw new StockIndisponibleException(presentation.getCodeCIP(), quantity);
-        }
-        stock.setQuantiteStockLogique(stock.getQuantiteStockLogique() - quantity);
-        Optional<Panier> panierOpt = panierRepository.findById(panierId);
-        if (panierOpt.isEmpty()) {
-            throw new PanierNotFoundException();
-        }
-        Panier panier = panierOpt.get();
-        stockRepository.save(stock);
-//        panier.addItem(new PanierItem(stock.getPresentation(), quantity));
-//        panierRepository.save(panier);
-    }
 }

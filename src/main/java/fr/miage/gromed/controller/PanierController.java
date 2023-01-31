@@ -3,11 +3,12 @@ package fr.miage.gromed.controller;
 
 import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.*;
-import fr.miage.gromed.exceptions.ExpiredPanierException;
-import fr.miage.gromed.exceptions.PanierNotFoundException;
-import fr.miage.gromed.exceptions.PresentationNotFoundException;
-import fr.miage.gromed.exceptions.StockIndisponibleException;
+import fr.miage.gromed.exceptions.*;
 
+import fr.miage.gromed.model.Utilisateur;
+import fr.miage.gromed.service.UtilisateurService;
+import fr.miage.gromed.service.auth.UserContextHolder;
+import fr.miage.gromed.service.metier.PanierAlreadyPaidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import fr.miage.gromed.service.metier.PanierService;
 
- @CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/panier")
 public class PanierController {
@@ -35,41 +36,68 @@ public class PanierController {
             return ResponseHandler.generateResponse("panier en cours", HttpStatus.CREATED,  panierService.getPanier(idPanier));
     }
 
-    @GetMapping("/user/{idUser}")
-    public ResponseEntity<Object> getPanierByUser(@PathVariable Long idUser){
-            return ResponseHandler.generateResponse("panier en cours", HttpStatus.CREATED,  panierService.getPanierByUser(idUser));
+    @GetMapping("/")
+    public ResponseEntity<Object> getCurrentPanier(@RequestParam String idUser){
+            return ResponseHandler.generateResponse("panier en cours", HttpStatus.OK,  panierService.getCurrentPanier());
     }
 
     @PutMapping("/add/{idPanier}")
-    public ResponseEntity<Object> addPanierItem(@PathVariable Long idPanier, @RequestBody PanierItemDto panierItemDto){
-            return ResponseHandler.generateResponse("item ajouté", HttpStatus.CREATED,  panierService.addPanierItem(idPanier, panierItemDto));
+    public ResponseEntity<Object> addToPanier(@PathVariable Long idPanier, @RequestBody PanierItemDto panierItemDto){
+            return ResponseHandler.generateResponse("item ajouté", HttpStatus.OK,  panierService.addToPanier(idPanier, panierItemDto));
     }
+
+    @PutMapping("/cancel/{idPanier}")
+    public ResponseEntity<Object> cancelPanier(@PathVariable Long idPanier){
+            return ResponseHandler.generateResponse("panier annulé", HttpStatus.CREATED,  panierService.cancelPanier(idPanier));
+    }
+
+    @GetMapping("/commande-types")
+    public ResponseEntity<Object> getCommandeTypes(){
+            return ResponseHandler.generateResponse("types de commande", HttpStatus.CREATED,  panierService.getCommandeTypes());
+    }
+
+
+//    @PutMapping("/update")
+//    public ResponseEntity<Object> updateItemPanier(@RequestBody PanierItemDto panierItemDto){
+//            return ResponseHandler.generateResponse("item ajouté", HttpStatus.CREATED,  panierService.updatePanierItem(idPanier, panierItemDto));
+//    }
     /**
      * Creer un panier avec un item, retourne le panier ou un message d'alerte
      */
     @PostMapping("/create")
     public ResponseEntity<Object> createPanier(@RequestBody PanierItemDto panierItemDto){
-            //TODO: verifier token utilisateur
             return ResponseHandler.generateResponse("Nouveau panier OK", HttpStatus.CREATED, panierService.createPanier(panierItemDto));
     }
 
     @PutMapping("/confirm/{idPanier}")
     public ResponseEntity<Object> confirmPanier(@PathVariable Long idPanier){
 //            PanierDto panierDto = panierService.confirmPanier(idPanier);
-            PanierDto panierDto = null;
-            return ResponseHandler.generateResponse("Panier confirmé", HttpStatus.OK, panierDto);
+            return ResponseHandler.generateResponse("Panier confirmé", HttpStatus.OK, panierService.confirmPanier(idPanier));
+    }
+
+    @PutMapping("/commandeType/{idPanier}")
+    public ResponseEntity<Object> setCommandeType(@PathVariable Long idPanier){
+            return ResponseHandler.generateResponse("commande type enregistrée", HttpStatus.OK, panierService.saveCommandeType(idPanier));
     }
 
     @PutMapping("/resolve")
     public ResponseEntity<Object> resolvePanier(@RequestBody AlerteStockDecisionDto decisionDto, @PathVariable Long idPanier){
-            //TODO: verifier utilisateur
         //TODO: verifier si le panier est nouveau ou pas
             PanierDto panierDto = panierService.resolve(decisionDto);
             return ResponseHandler.generateResponse("résolu", HttpStatus.GONE, panierDto);
     }
 
+    @GetMapping("/historique")
+    public ResponseEntity<Object> getHistorique(){
+            return ResponseHandler.generateResponse("historique", HttpStatus.OK, panierService.getHistorique());
+    }
+
+    @Autowired
+    private UtilisateurService utilisateurService;
+
     @ExceptionHandler(StockIndisponibleException.class)
     public ResponseEntity<Object> handleStockIndisponibleException(StockIndisponibleException e) {
+        utilisateurService.await();
         return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.MULTIPLE_CHOICES);
     }
 
@@ -94,21 +122,24 @@ public class PanierController {
         return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(PanierCantBeCanceledException.class)
+    public ResponseEntity<Object> panierCantBeCanceledExceptionHandler(PanierCantBeCanceledException e) {
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler(PanierAlreadyPaidException.class)
+    public ResponseEntity<Object> panierAlreadyPaidException(PanierCantBeCanceledException e) {
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
+    @ExceptionHandler(PanierCanceledException.class)
+    public ResponseEntity<Object> panierAlreadyPaidException(PanierCanceledException e) {
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
 
     public ResponseEntity<Object> getCommandeType(@PathVariable Long idPanier){
         return null;
     }
 
 
-    @PutMapping("/{idPanier}")
-    public ResponseEntity<PanierDto> updatePanier(@PathVariable int idPanier, @RequestBody PresentationDto presentationDto){
-//        return panierService.updatePanier(idPanier, presentationDto);
-        return ResponseEntity.noContent().build();
-    }
 
-    @DeleteMapping("/{idPanier}")
-    public ResponseEntity<PanierDto> deleteItemsPanier(@PathVariable int idPanier, @RequestBody PresentationDto presentationDto){
-//        return panierService.delete(idPanier);
-        return ResponseEntity.noContent().build();
-    }
 }

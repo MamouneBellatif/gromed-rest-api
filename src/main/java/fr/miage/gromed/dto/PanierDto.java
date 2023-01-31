@@ -23,6 +23,9 @@ public class PanierDto implements Serializable {
     private Long id;
     private List<PanierItemDto> items;
     private LocalDateTime dateCreation;
+    private String status;
+
+
 
 
 }

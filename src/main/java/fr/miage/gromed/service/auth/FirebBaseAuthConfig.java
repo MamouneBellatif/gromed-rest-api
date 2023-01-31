@@ -13,7 +13,6 @@ public class FirebBaseAuthConfig {
         public FilterRegistrationBean<AuthFilter> firebaseAuthFilter() {
             FilterRegistrationBean<AuthFilter> registrationBean = new FilterRegistrationBean<>();
             registrationBean.setFilter(new AuthFilter());
-//            registrationBean.setFilter(authFilter);
             registrationBean.addUrlPatterns("/api/*");
             return registrationBean;
         }

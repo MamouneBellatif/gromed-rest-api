@@ -1,35 +1,39 @@
 package fr.miage.gromed.service.auth;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
-import java.io.FileInputStream;
+
 import java.io.IOException;
 import java.util.logging.Logger;
 
 import com.google.firebase.auth.UserRecord;
+import fr.miage.gromed.service.UtilisateurService;
 import jakarta.servlet.Filter;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class AuthFilter implements Filter {
 
 Logger logger = Logger.getLogger(AuthFilter.class.getName());
 
-
+    @Autowired
+    UtilisateurService utilisateurService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, jakarta.servlet.FilterChain chain) throws IOException, jakarta.servlet.ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
+        HttpSession session = httpRequest.getSession();
+
 //        String idToken = httpRequest.getHeader("Authorization");
         httpResponse.setHeader("Access-Control-Allow-Origin", "*");
         httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
@@ -47,6 +51,7 @@ Logger logger = Logger.getLogger(AuthFilter.class.getName());
         if (idToken == null) {
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
             return;
+
         }
         logger.info("idToken bear : " + idToken);
 
@@ -55,19 +60,17 @@ Logger logger = Logger.getLogger(AuthFilter.class.getName());
 
         try {
             UserRecord userRecord = FirebaseAuth.getInstance(FirebaseApp.getInstance("gromed-3c731")).getUser(idToken);
-
-//            FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
-//            logger.info("sub2: " + firebaseToken.getUid());
-//            httpRequest.setAttribute("firebaseToken", firebaseToken);
+            UserContextHolder.setUtilisateur(utilisateurService.syncUser(userRecord, UriComponentsBuilder.fromHttpRequest((HttpRequest) httpRequest).build().toUriString()));
             chain.doFilter(request, response);
+//            FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
         } catch (FirebaseAuthException e) {
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Failed to verify Firebase ID token: " + e.getMessage());
         }
     }
 
-    @Override
-    public void destroy() {
-        // Clean up resources.
-    }
+        @Override
+        public void destroy() {
+            // Clean up resources.
+        }
 
 }
