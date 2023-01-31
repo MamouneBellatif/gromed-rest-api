@@ -1,5 +1,6 @@
 package fr.miage.gromed.controller;
 
+
 import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.*;
 import fr.miage.gromed.exceptions.ExpiredPanierException;
@@ -15,8 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import fr.miage.gromed.service.metier.PanierService;
 
-
-@CrossOrigin(origins = "*")
+ @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/panier")
 public class PanierController {
@@ -38,6 +38,11 @@ public class PanierController {
     @GetMapping("/user/{idUser}")
     public ResponseEntity<Object> getPanierByUser(@PathVariable Long idUser){
             return ResponseHandler.generateResponse("panier en cours", HttpStatus.CREATED,  panierService.getPanierByUser(idUser));
+    }
+
+    @PutMapping("/add/{idPanier}")
+    public ResponseEntity<Object> addPanierItem(@PathVariable Long idPanier, @RequestBody PanierItemDto panierItemDto){
+            return ResponseHandler.generateResponse("item ajouté", HttpStatus.CREATED,  panierService.addPanierItem(idPanier, panierItemDto));
     }
     /**
      * Creer un panier avec un item, retourne le panier ou un message d'alerte
@@ -86,7 +91,7 @@ public class PanierController {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> exceptionHandler(Exception e) {
         logger.error("Erreur: ", e);
-        return ResponseHandler.generateFailureResponse(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
