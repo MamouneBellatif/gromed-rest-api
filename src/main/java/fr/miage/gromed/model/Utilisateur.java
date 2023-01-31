@@ -5,6 +5,8 @@ import fr.miage.gromed.model.enums.PerimetreUtilisateur;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Setter
 @Builder
@@ -40,4 +42,16 @@ public class Utilisateur {
     @Column
     private boolean isBuying;
 
+    @ElementCollection
+    private List<String> notifications;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Utilisateur that = (Utilisateur) o;
+
+        return id.equals(that.id);
+    }
 }

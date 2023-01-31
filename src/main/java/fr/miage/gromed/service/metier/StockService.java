@@ -47,6 +47,8 @@ public class StockService {
         });
     }
 
+
+
     @Transactional(rollbackFor = Exception.class)
     @Lock(LockModeType.OPTIMISTIC)
     public void updateStock(Presentation presentation, int quantity, boolean isCancellingOrder, boolean isLogicalStock) {

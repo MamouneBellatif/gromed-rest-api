@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//Repasser sur les autorisations d'achat
 @Service
 public class PanierService {
 
@@ -55,19 +56,6 @@ public class PanierService {
         this.commandeTypeMapper = commandeTypeMapper;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void confirmOrder(Long idPanier) throws StockIndisponibleException {
-        Optional<Panier> panierOpt = panierRepository.findById(idPanier);
-        if(panierOpt.isEmpty()) {
-            return;
-        }
-        Panier panier = panierOpt.get();
-        StockService.checkStockDisponible(panier);
-        panierRepository.delete(panier);
-//        return true;
-        return;
-
-    }
 
     @Transactional(rollbackFor = Exception.class)
     public PanierDto getPanier(Long idPanier) {
@@ -147,25 +135,72 @@ public class PanierService {
         return !panierItem.getPresentation().getEtatCommercialisation().toLowerCase().contains("arrêt");
     }
 
+    //TODO: Complete this method
     @Transactional(rollbackFor = Exception.class)
-    public PanierDto resolveItem(AlerteStockDecisionDto alerteStockDecisionDto){
+    public PanierDto resolveItem(AlerteStockDecisionDto alerteStockDecisionDto) {
         PanierItem panierItem = panierItemMapper.toEntity(alerteStockDecisionDto.getPanierItemDto());
-        if (alerteStockDecisionDto.isAccept()) {
-            panierItem.setDelayed(true);
-            Panier panier = panierRepository.findByItemsId(panierItem.getId());
-            panierRepository.save(panier);
+        Panier panier = panierItem.getPanier();
+        var isUpdating = false;
+        if (panier != null) {
+            isUpdating = panierItemRepository.existsByPanierAndPresentation_Id(panier, panierItem.getPresentation().getId());
+            if (checkExpiredPanier(panier)) {
+                throw new ExpiredPanierException();
+            }
+            //Item existe dans panier et accepte livraison retardée
+            if (isUpdating && alerteStockDecisionDto.isAccept()) {
+                panierItem.setDelayed(true);
+                panierRepository.save(panier);
+                stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), false, true);
+                return panierMapper.toDto(panier);
+            }//item existe et annule l'item
+            if (isUpdating && !alerteStockDecisionDto.isAccept()) {
+                panierItemRepository.delete(panierItem);
+                return panierMapper.toDto(panier);
+            }// item  n'existe pas dans panier et accepte livraison retardée
+            if (!isUpdating && alerteStockDecisionDto.isAccept()) {
+                panierItem.setDelayed(true);
+                panierItem.setPanier(panier);
+                panier.addItem(panierItem);
+                stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), false, true);
+                panierRepository.save(panier);
+                return panierMapper.toDto(panier);
+            }
+            if (!isUpdating && !alerteStockDecisionDto.isAccept()) {
+                return panierMapper.toDto(panier);
+            }
+            panierItemRepository.delete(panierItem);
+            stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), true, true);
             return panierMapper.toDto(panier);
         }
-        Panier panier = panierRepository.findByItemsId(panierItem.getId());
-        panier.setCanceled(true);
-        stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), true, true);
-        panierRepository.save(panier);
-        return panierMapper.toDto(panier);
-    }
+       //panier n'existe pas et pas de panier actif pour l'utilisateur et user accepte la livraison retardée
+        if (alerteStockDecisionDto.isAccept() && panierRepository.existsByClientAndExpiresAtAfterAndPaidFalseAndCanceledFalse(UserContextHolder.getUtilisateur(), LocalDateTime.now())) {
+            Panier newPanier = Panier.builder()
+                    .dateCreation(LocalDateTime.now())
+                    .isPaid(false)
+                    .expired(false)
+                    .expiresAt(LocalDateTime.now().plusMinutes(30))
+                    .isShipped(false)
+                    .isDelivered(false)
+                    .items(new LinkedHashSet<>())
+                    .client(UserContextHolder.getUtilisateur())
+                    .build();
+            panierItemRepository.save(panierItem);
+            newPanier.addItem(panierItem);
+            panierRepository.save(newPanier);
+            return panierMapper.toDto(newPanier);
+        }
 
-    private PanierDto resolvePanier(AlerteStockDecisionDto alerteStockDecisionDto){
-            Panier panier = panierMapper.toEntity(alerteStockDecisionDto.getPanierDto());
+
+        return null;
+    }
+    private PanierDto resolvePanier(Panier panier, AlerteStockDecisionDto alerteStockDecisionDto){
             if (alerteStockDecisionDto.isAccept()) {
+                panier.getItems().forEach(panierItem -> {
+                    var missing = panierItem.getQuantite() - panierItem.getPresentation().getStock().getQuantiteStockPhysique();
+                    var delayed = missing > 0;
+                    panierItem.setDelayed(delayed);
+                    stockService.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), false, true);
+                });
                 panier.setDelayed(true);
                 panierRepository.save(panier);
                 return panierMapper.toDto(panier);
@@ -175,13 +210,22 @@ public class PanierService {
 
     @Transactional(rollbackFor = Exception.class)
     public PanierDto resolve(AlerteStockDecisionDto alerteStockDecisionDto){
-        if (checkExpiredPanier(panierMapper.toEntity(alerteStockDecisionDto.getPanierDto()))) {
+
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+        Panier panier = panierRepository.findById(alerteStockDecisionDto.getPanierId()).orElseThrow(PanierNotFoundException::new);
+        if(panier.getClient().equals(utilisateur)){
+            throw new UserNotAllowedToBuyException();
+        }
+        if (!utilisateur.isAwaitingResponse()){
+            throw new NoConflictToResolveException();
+        }
+        if (checkExpiredPanier(panier)) {
             throw new ExpiredPanierException();
         }
         if (alerteStockDecisionDto.isItem()) {
             return resolveItem(alerteStockDecisionDto);
         }
-        return resolvePanier(alerteStockDecisionDto);
+        return resolvePanier(panier,alerteStockDecisionDto);
     }
 
     //TODO:Mettre a jour un panier
@@ -305,9 +349,16 @@ public class PanierService {
     final
     ComptabiliteInterneService comptabiliteInterneService;
 
+    private boolean checkUser(Panier panier) {
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+        return panier.getClient().getId().equals(utilisateur.getId());
+    }
     @Transactional(rollbackFor = Exception.class)
     public Object confirmPanier(Long idPanier) {
         Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
+        if (!checkUser(panier)) {
+            throw new WrongUserException();
+        }
         if (checkExpiredPanier(panier)) {
             throw new ExpiredPanierException();
         }

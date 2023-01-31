@@ -39,7 +39,6 @@ public class PresentationController {
     @GetMapping(value = "/{searchQuery}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Page<PresentationDto>> searchByString( @PathVariable String searchQuery, @PageableDefault(sort = "libelle", size = 10) Pageable pageable) throws FirebaseAuthException {
-//        FirebaseAuth.getInstance().verifyIdToken(jwt);
         var presentationPage = presentationService.searchPresentation(searchQuery,pageable);
         return ResponseEntity.ok(presentationPage);
     }
@@ -47,12 +46,9 @@ public class PresentationController {
     @GetMapping(value = "/fiche/{idPresentation}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getPresentation(@PathVariable Long idPresentation) {
-        try {
             var presentationFicheDto = presentationService.getPresentationFiche(idPresentation);
             return ResponseHandler.generateResponse("Presentation de la fiche", HttpStatus.OK,presentationFicheDto);
-        } catch (PresentationNotFoundException pe) {
-            return ResponseHandler.generateFailureResponse(pe.getMessage(), HttpStatus.NOT_FOUND);
-        }
+
     }
 
     @ExceptionHandler(PresentationNotFoundException.class)

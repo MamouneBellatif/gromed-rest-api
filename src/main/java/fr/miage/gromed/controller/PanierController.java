@@ -9,6 +9,7 @@ import fr.miage.gromed.model.Utilisateur;
 import fr.miage.gromed.service.UtilisateurService;
 import fr.miage.gromed.service.auth.UserContextHolder;
 import fr.miage.gromed.service.metier.PanierAlreadyPaidException;
+import jakarta.persistence.OptimisticLockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,7 @@ public class PanierController {
     }
 
     @PutMapping("/resolve")
-    public ResponseEntity<Object> resolvePanier(@RequestBody AlerteStockDecisionDto decisionDto, @PathVariable Long idPanier){
+    public ResponseEntity<Object> resolvePanier(@RequestBody AlerteStockDecisionDto decisionDto){
         //TODO: verifier si le panier est nouveau ou pas
             PanierDto panierDto = panierService.resolve(decisionDto);
             return ResponseHandler.generateResponse("résolu", HttpStatus.GONE, panierDto);
@@ -99,6 +100,11 @@ public class PanierController {
     public ResponseEntity<Object> handleStockIndisponibleException(StockIndisponibleException e) {
         utilisateurService.await();
         return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.MULTIPLE_CHOICES);
+    }
+
+    @ExceptionHandler(OptimisticLockException.class)
+    public ResponseEntity<Object> handleOptimisticLockException(OptimisticLockException e) {
+        return ResponseHandler.generateFailureResponse("Le panier a été modifié par un autre utilisateur", HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ExpiredPanierException.class)
