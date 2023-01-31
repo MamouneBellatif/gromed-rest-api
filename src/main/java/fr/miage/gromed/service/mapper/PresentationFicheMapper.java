@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @Component
 public class PresentationFicheMapper implements EntityMapper<PresentationFicheDto, Presentation>{
@@ -25,7 +24,7 @@ public class PresentationFicheMapper implements EntityMapper<PresentationFicheDt
         return PresentationFicheDto.builder().
                 codeCIP(entity.getCodeCIP())
                 .libelle(entity.getLibelle())
-                .denomination(medicament.getDenomination())
+                .medicamentDenomination(medicament.getDenomination())
                 .prixDeBase(entity.getPrixDeBase())
                 .imageUrl(medicament.getUrlImage())
                 .stock(entity.getStock().getQuantiteStockLogique())

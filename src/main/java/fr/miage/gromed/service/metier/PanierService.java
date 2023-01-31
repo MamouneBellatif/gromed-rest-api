@@ -8,6 +8,7 @@ import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.model.Utilisateur;
 import fr.miage.gromed.model.medicament.Medicament;
+import fr.miage.gromed.repositories.PanierItemRepository;
 import fr.miage.gromed.repositories.PanierRepository;
 import fr.miage.gromed.scheduler.restockfaker.PanierCleanExpired;
 import fr.miage.gromed.service.mapper.PanierItemMapper;
@@ -42,6 +43,8 @@ public class PanierService {
     @Autowired
     private  PanierCleanExpired panierCleanExpired;
     private final TaskScheduler taskScheduler;
+    @Autowired
+    private PanierItemRepository panierItemRepository;
 
     @Autowired
     public PanierService(TaskScheduler taskScheduler,PanierItemMapper panierItemMapper, PanierRepository panierRepository, StockService stockService, PanierMapper panierMapper) {
@@ -279,5 +282,21 @@ public class PanierService {
     //TODO: Lier utilisateur à panier et verifier si l'utilisateur a deja un panier actif
     public List<Panier> getPanierByUser(Long idUser) {
         return panierRepository.findByClientId(idUser);
+    }
+
+    public PanierItemDto addPanierItem(Long idPanier, PanierItemDto panierItemDto) {
+        Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
+        PanierItem panierItem = panierItemMapper.toEntity(panierItemDto);
+        final Long itemId = panierItem.getId();
+        Set<PanierItem> panierItems = panier.getItems();
+        boolean isItemExist = panierItems.stream().anyMatch(item -> item.getPresentation().getId().equals(itemId));
+        panierItem.setQuantite(panierItem.getQuantite());
+        if (!isItemExist) {
+            panier.addItem(panierItem);
+            panierItem.setPanier(panier);
+        }
+        panierRepository.save(panier);
+        panierItemRepository.save(panierItem);
+        return panierItemMapper.toDto(panierItem);
     }
 }

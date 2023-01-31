@@ -3,6 +3,7 @@ package fr.miage.gromed.dto;
 import fr.miage.gromed.model.medicament.Presentation;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
@@ -10,7 +11,7 @@ import java.io.Serializable;
  * A DTO for the {@link Presentation} entity
  */
 @Data
-@Builder
+@SuperBuilder
 public class PresentationDto implements Serializable {
     private final Long codeCIP;
     private final String libelle;

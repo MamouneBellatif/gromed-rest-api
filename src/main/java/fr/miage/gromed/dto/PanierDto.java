@@ -1,6 +1,5 @@
 package fr.miage.gromed.dto;
 
-import com.fasterxml.jackson.databind.annotation.JacksonStdImpl;
 import fr.miage.gromed.model.Panier;
 import lombok.*;
 

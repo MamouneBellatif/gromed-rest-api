@@ -1,11 +1,15 @@
 package fr.miage.gromed.controller;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.repositories.PresentationRepository;
 import fr.miage.gromed.service.metier.PresentationService;
 import fr.miage.gromed.service.mapper.PresentationMapper;
+import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +38,8 @@ public class PresentationController {
 
     @GetMapping(value = "/{searchQuery}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PresentationDto>> searchByString(@PathVariable String searchQuery, @PageableDefault(sort = "libelle", size = 10) Pageable pageable) {
+    public ResponseEntity<Page<PresentationDto>> searchByString( @PathVariable String searchQuery, @PageableDefault(sort = "libelle", size = 10) Pageable pageable) throws FirebaseAuthException {
+//        FirebaseAuth.getInstance().verifyIdToken(jwt);
         var presentationPage = presentationService.searchPresentation(searchQuery,pageable);
         return ResponseEntity.ok(presentationPage);
     }
@@ -57,6 +62,6 @@ public class PresentationController {
 
     @ExceptionHandler
     public ResponseEntity<Object> handleException(Exception e) {
-        return ResponseHandler.generateFailureResponse(ERREUR_INTERNE, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
