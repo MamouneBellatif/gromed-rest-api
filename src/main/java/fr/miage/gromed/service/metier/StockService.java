@@ -8,8 +8,10 @@ import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.PanierRepository;
 import fr.miage.gromed.repositories.PresentationRepository;
 import fr.miage.gromed.repositories.StockRepository;
+import fr.miage.gromed.service.listeners.StockUpdateEvent;
 import jakarta.persistence.LockModeType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,14 +26,18 @@ import java.util.logging.Logger;
 @Service
 public class StockService {
 
-    @Autowired
-    private StockRepository stockRepository;
-    @Autowired
-    private PanierRepository panierRepository;
-    @Autowired
-    private PresentationRepository presentationRepository;
+    private final StockRepository stockRepository;
+    private final PanierRepository panierRepository;
+    private final PresentationRepository presentationRepository;
 
+    private final ApplicationEventPublisher publisher;
 
+    public StockService(StockRepository stockRepository, PanierRepository panierRepository, PresentationRepository presentationRepository, ApplicationEventPublisher publisher) {
+        this.stockRepository = stockRepository;
+        this.panierRepository = panierRepository;
+        this.presentationRepository = presentationRepository;
+        this.publisher = publisher;
+    }
 
     public static void checkStockDisponible(Panier panier) {
         panier.getItems().forEach(panierItem -> {
@@ -56,8 +62,8 @@ public class StockService {
         }
         stockRepository.save(stock);
         presentationRepository.save(presentation);
-
-        }
+        publisher.publishEvent(new StockUpdateEvent(stock));
+    }
 
     @Transactional
     public void resetStockLogique(List<Panier> expiredCarts) {
@@ -69,6 +75,7 @@ public class StockService {
         panier.getItems().forEach(panierItem -> {
             this.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), true, true);
         });
+
     }
 
     Logger logger = Logger.getLogger(StockService.class.getName());
