@@ -50,7 +50,12 @@ public class UtilisateurService {
     }
 
     public void setBuying(){
-        utilisateurRepository.setBuying(true);
+//        utilisateurRepository.isBuying(true);
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+        if (utilisateur != null) {
+            utilisateur.setBuying(true);
+            utilisateurRepository.save(utilisateur);
+        }
     }
 
     public Object login(String uid) {

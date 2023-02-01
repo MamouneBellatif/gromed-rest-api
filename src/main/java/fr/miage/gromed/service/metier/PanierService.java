@@ -15,9 +15,7 @@ import fr.miage.gromed.service.mapper.PanierItemMapper;
 import fr.miage.gromed.service.mapper.PanierMapper;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.LockModeType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -107,11 +105,12 @@ public class PanierService {
         }
         Panier panier = Panier.builder()
                         .dateCreation(LocalDateTime.now())
-                        .isPaid(false)
+                        .paid(false)
                         .expired(false)
                         .expiresAt(LocalDateTime.now().plusMinutes(30))
                         .isShipped(false)
-                        .isDelivered(false)
+                        .delivered(false)
+                        .canceled(false)
                         .items(new LinkedHashSet<>())
                         .client(UserContextHolder.getUtilisateur())
                         .build()
@@ -176,11 +175,12 @@ public class PanierService {
         if (alerteStockDecisionDto.isAccept() && panierRepository.existsByClientAndExpiresAtAfterAndPaidFalseAndCanceledFalse(UserContextHolder.getUtilisateur(), LocalDateTime.now())) {
             Panier newPanier = Panier.builder()
                     .dateCreation(LocalDateTime.now())
-                    .isPaid(false)
+                    .paid(false)
                     .expired(false)
                     .expiresAt(LocalDateTime.now().plusMinutes(30))
                     .isShipped(false)
-                    .isDelivered(false)
+                    .delivered(false)
+                    .canceled(false)
                     .items(new LinkedHashSet<>())
                     .client(UserContextHolder.getUtilisateur())
                     .build();

@@ -33,10 +33,10 @@ public class Panier implements AbstractEntity<Long> {
     private LocalDateTime dateCreation;
 
     @Column
-    private boolean isPaid;
+    private boolean paid;
 
     @Column
-    private boolean isCanceled;
+    private boolean canceled;
 
     @Column
     private boolean awaitingResponse;
@@ -63,7 +63,7 @@ public class Panier implements AbstractEntity<Long> {
     private boolean isShipped;
 
     @Column
-    private boolean isDelivered;
+    private boolean delivered;
 
     @Column
     private boolean delayed;

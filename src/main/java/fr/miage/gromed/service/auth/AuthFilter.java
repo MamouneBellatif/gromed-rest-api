@@ -34,12 +34,14 @@ Logger logger = Logger.getLogger(AuthFilter.class.getName());
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpSession session = httpRequest.getSession();
 
+        logger.info("AuthFilter");
 //        String idToken = httpRequest.getHeader("Authorization");
         httpResponse.setHeader("Access-Control-Allow-Origin", "*");
         httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
         httpResponse.setHeader("Access-Control-Max-Age", "3600");
 
         if (httpRequest.getMethod().equals("OPTIONS")) {
+            logger.info("OPTIONS");
             httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
             httpResponse.setHeader("Access-Control-Allow-Headers", "*");
             chain.doFilter(request, response);
