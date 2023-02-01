@@ -1,4 +1,4 @@
-package fr.miage.gromed.controller;
+package fr.miage.gromed.model.controller;
 
 import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.service.listeners.StockUpdateEvent;

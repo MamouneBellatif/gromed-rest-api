@@ -19,7 +19,7 @@ public class Utilisateur {
     @Column(name = "user_id", nullable = false)
     private String id;
 
-    @Column(nullable = false)
+    @Column
     private String nom;
 
     @Column( unique = true)

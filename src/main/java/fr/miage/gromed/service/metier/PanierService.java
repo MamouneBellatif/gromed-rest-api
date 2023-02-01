@@ -101,7 +101,8 @@ public class PanierService {
     public PanierDto createPanier(PanierItemDto itemDtoSet) {
         Utilisateur utilisateur = UserContextHolder.getUtilisateur();
         if (hasActivePanier(utilisateur)) {
-            throw new HasActivePanierException();
+            return this.addToPanier(getCurrentPanier().getId(), itemDtoSet);
+//            throw new HasActivePanierException();
         }
         Panier panier = Panier.builder()
                         .dateCreation(LocalDateTime.now())
@@ -117,7 +118,7 @@ public class PanierService {
                 ;
         PanierItemDto panierItemDto = sanitizeItemsInput(itemDtoSet);
         PanierItem panierItem = panierItemMapper.toEntity(panierItemDto);
-        if (isUserAllowedToBuy(panierItem, utilisateur)) {
+        if (!isUserAllowedToBuy(panierItem, utilisateur)) {
             throw new UserNotAllowedToBuyException();
         }
         if (!checkCommercialisation(panierItem)) {
@@ -302,7 +303,7 @@ public class PanierService {
         if (checkExpiredPanier(panier)) {
             throw new ExpiredPanierException();
         }
-        Presentation presentation = presentationRepository.findById(panierItemDto.getPresentationCip()).orElseThrow(PresentationNotFoundException::new);
+        Presentation presentation = presentationRepository.findByCodeCIP(panierItemDto.getPresentationCip()).orElseThrow(PresentationNotFoundException::new);
         PanierItem panierItem = panierItemRepository.findByPanier_IdAndPresentation_Id(
                             panier.getId(),
                             panierItemDto.getPresentationCip())
@@ -355,7 +356,8 @@ public class PanierService {
     }
     @Transactional(rollbackFor = Exception.class)
     public Object confirmPanier(Long idPanier) {
-        Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
+        Panier panier = panierMapper.toEntity(getCurrentPanier());
+//        Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
         if (!checkUser(panier)) {
             throw new WrongUserException();
         }

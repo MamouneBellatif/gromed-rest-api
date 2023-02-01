@@ -1,12 +1,12 @@
-package fr.miage.gromed.controller;
+package fr.miage.gromed.model.controller;
 
-import fr.miage.gromed.controller.customResponse.AbstractResponseEntity;
+import fr.miage.gromed.model.controller.customResponse.AbstractResponseEntity;
 import fr.miage.gromed.dto.PanierDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 
-public class PanierResponseEntity extends ResponseEntity<HttpStatus> implements AbstractResponseEntity<PanierDto,String>  {
+public class PanierResponseEntity extends ResponseEntity<HttpStatus> implements AbstractResponseEntity<PanierDto,String> {
 
     private PanierDto body;
     private String message;

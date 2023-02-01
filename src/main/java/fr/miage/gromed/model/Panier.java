@@ -22,7 +22,7 @@ public class Panier implements AbstractEntity<Long> {
 
 
 //    @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
-    @OneToMany(mappedBy="panier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER ,mappedBy="panier", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PanierItem> items;
 
     //date with hour and minute

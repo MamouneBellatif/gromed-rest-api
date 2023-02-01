@@ -1,13 +1,11 @@
-package fr.miage.gromed.controller;
+package fr.miage.gromed.model.controller;
 
 
-import fr.miage.gromed.controller.customResponse.ResponseHandler;
+import fr.miage.gromed.model.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.*;
 import fr.miage.gromed.exceptions.*;
 
-import fr.miage.gromed.model.Utilisateur;
 import fr.miage.gromed.service.UtilisateurService;
-import fr.miage.gromed.service.auth.UserContextHolder;
 import fr.miage.gromed.service.metier.PanierAlreadyPaidException;
 import jakarta.persistence.OptimisticLockException;
 import org.slf4j.Logger;
@@ -70,7 +68,7 @@ public class PanierController {
             return ResponseHandler.generateResponse("Nouveau panier OK", HttpStatus.CREATED, panierService.createPanier(panierItemDto));
     }
 
-    @PutMapping("/confirm/{idPanier}")
+    @PutMapping("/confirm")
     public ResponseEntity<Object> confirmPanier(@PathVariable Long idPanier){
 //            PanierDto panierDto = panierService.confirmPanier(idPanier);
             return ResponseHandler.generateResponse("Panier confirmé", HttpStatus.OK, panierService.confirmPanier(idPanier));
@@ -105,6 +103,16 @@ public class PanierController {
     @ExceptionHandler(OptimisticLockException.class)
     public ResponseEntity<Object> handleOptimisticLockException(OptimisticLockException e) {
         return ResponseHandler.generateFailureResponse("Le panier a été modifié par un autre utilisateur", HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleException(PanierAlreadyPaidException e) {
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleCustomException(CustomException e) {
+        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
     }
 
     @ExceptionHandler(ExpiredPanierException.class)

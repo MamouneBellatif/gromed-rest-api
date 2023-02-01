@@ -1,4 +1,4 @@
-package fr.miage.gromed.controller.customResponse;
+package fr.miage.gromed.model.controller.customResponse;
 
 
 public interface AbstractResponseEntity<E,String> {

@@ -1,15 +1,11 @@
-package fr.miage.gromed.controller;
+package fr.miage.gromed.model.controller;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
-import fr.miage.gromed.controller.customResponse.ResponseHandler;
+import fr.miage.gromed.model.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.repositories.PresentationRepository;
 import fr.miage.gromed.service.metier.PresentationService;
-import fr.miage.gromed.service.mapper.PresentationMapper;
-import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

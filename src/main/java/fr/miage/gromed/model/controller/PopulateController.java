@@ -1,4 +1,4 @@
-package fr.miage.gromed.controller;
+package fr.miage.gromed.model.controller;
 
 import fr.miage.gromed.service.metier.PopulateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +32,12 @@ public class PopulateController {
 //        populateService.populateInfos();
         populateService.populateAvis();
         return "pres populate";
+    }
+
+    @GetMapping("/populatePres")
+    public String populatePres(){
+        populateService.initStock();
+        return "stock init";
     }
 
     @GetMapping("populUrls")

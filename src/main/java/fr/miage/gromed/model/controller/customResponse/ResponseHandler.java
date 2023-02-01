@@ -1,4 +1,4 @@
-package fr.miage.gromed.controller.customResponse;
+package fr.miage.gromed.model.controller.customResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,19 +1,14 @@
-package fr.miage.gromed.controller;
+package fr.miage.gromed.model.controller;
 
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseToken;
-import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.UtilisateurDto;
+import fr.miage.gromed.model.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.exceptions.IncompleteUtilisateurException;
-import fr.miage.gromed.exceptions.UtilisateurInexistantException;
 import fr.miage.gromed.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 
 @CrossOrigin(origins = "*")
 @RestController("/api/utilisateur")
@@ -27,14 +22,13 @@ public class UtilisateurController {
         this.utilisateurService = utilisateurService;
     }
 
-    @GetMapping("/login/{uid}")
-    public ResponseEntity<Object> verifyToken(@PathVariable String uid,  @RequestHeader("Authorization") String authorization) throws Exception {
-//        String idToken = authorization.replace("Bearer ", "");
-//
-//        FirebaseAuth.getInstance().verifyIdToken(idToken);
-        return ResponseHandler.generateResponse("Utilisateur connecté", HttpStatus.OK, utilisateurService.login(uid));
-    }
-//
+//    @GetMapping("/update")
+//    public ResponseEntity<Object> updateEtablissement(@PathVariable Long id, @RequestBody UtilisateurDto utilisateurDto){
+//        return ResponseHandler.generateResponse("Etablissement mis à jour", HttpStatus.OK, utilisateurService.updateEtablissement(id, utilisateurDto));
+//    }
+
+
+
 //    @GetMapping("/login")
 //    public ResponseEntity<Object> verifyToken(Principal principal)   {
 //        return ResponseHandler.generateResponse("Utilisateur connecté", HttpStatus.OK, utilisateurService.checkUser(principal));
