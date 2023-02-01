@@ -1,19 +1,23 @@
 package fr.miage.gromed.service.metier;
 
 import fr.miage.gromed.dto.Facture;
+import fr.miage.gromed.dto.PanierItemDto;
+import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.model.ComptabiliteInterne;
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.PanierItem;
 import fr.miage.gromed.model.enums.ComptabiliteParametres;
 import fr.miage.gromed.repositories.ComptabiliteInterneRepository;
+import fr.miage.gromed.repositories.PanierRepository;
+import fr.miage.gromed.repositories.PresentationRepository;
 import jakarta.persistence.LockModeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,58 +27,72 @@ import static fr.miage.gromed.model.enums.ComptabiliteParametres.CHIFFRE_AFFAIRE
 @Service
 public class ComptabiliteInterneService {
 
-        @Autowired
-        private ComptabiliteInterneRepository comptabiliteInterneRepository;
+    private final ComptabiliteInterneRepository comptabiliteInterneRepository;
+    private final PresentationRepository presentationRepository;
 
-        public void payerPanier() {
+    @Autowired
+    public ComptabiliteInterneService(ComptabiliteInterneRepository comptabiliteInterneRepository,
+                                      PresentationRepository presentationRepository,
+                                      PanierRepository panierRepository) {
+        this.comptabiliteInterneRepository = comptabiliteInterneRepository;
+        this.presentationRepository = presentationRepository;
+    }
+
+    public void payerPanier() {
             // TODO
         }
 
       @Transactional(rollbackFor = Exception.class)
       @Lock(LockModeType.PESSIMISTIC_WRITE)
       public Facture createFacture(Panier panier) {
-        // TODO générer la facture en dto pour génerer pdf en front
           Set<PanierItem> panierItems = panier.getItems();
-          //get the total price of the basket (price of the product + refund fee times the quantity)
+          final var tva = 0.2;
           var prixTotal = panierItems.stream().mapToDouble(item -> (item.getPresentation().getPrixDeBase()+item.getPresentation().getHonoraireRemboursement())* item.getQuantite()).sum();
-
-          comptabiliteInterneRepository.findByParametre(CHIFFRE_AFFAIRE).ifPresentOrElse(comptabiliteInterne -> {
-              comptabiliteInterne.setValeur(comptabiliteInterne.getValeur()+prixTotal);
-              comptabiliteInterneRepository.save(comptabiliteInterne);
-          }, () -> {
-              final var comptabiliteInterne = new ComptabiliteInterne();
-              comptabiliteInterne.setParametre(CHIFFRE_AFFAIRE);
-              comptabiliteInterne.setValeur(prixTotal);
-              comptabiliteInterneRepository.save(comptabiliteInterne);
-          });
+          var prixTTC = prixTotal + prixTotal*tva;
+          this.cashTransaction(CHIFFRE_AFFAIRE,prixTTC);
           Map<String, Integer> produitQuantite = panierItems.stream().collect(
                   Collectors.toMap(
-                          panierItem -> panierItem.getPresentation().getLibelle() + " " + panierItem.getPresentation().getMedicament().getDenomination(),
+                          panierItem -> panierItem.getPresentation().getLibelle() + ": " + panierItem.getPresentation().getMedicament().getDenomination(),
                           PanierItem::getQuantite
                   )
           );
-
           Map<String, Double> coutProduit = panierItems.stream().collect(
                   Collectors.toMap(
-                          panierItem -> panierItem.getPresentation().getLibelle() + " " + panierItem.getPresentation().getMedicament().getDenomination(),
+                          panierItem -> panierItem.getPresentation().getLibelle() + ": " + panierItem.getPresentation().getMedicament().getDenomination(),
                           panierItem -> panierItem.getPresentation().getPrixDeBase()+panierItem.getPresentation().getHonoraireRemboursement()
                   )
           );
-
-
-
-        return Facture.builder().nomClient(panier.getClient().getNom()).montant(prixTotal).produitsAchetes(produitQuantite).prixProduits(coutProduit).date(LocalDateTime.now()).build();
+        return Facture.builder().idPanier(panier.getId()).nomClient(panier.getClient().getNom()).montant(prixTTC).produitsAchetes(produitQuantite).prixProduits(coutProduit).date(LocalDateTime.now()).build();
     }
 
-//    @Transactional
-//    public void populateComptabiliteInterne(){
-//        ComptabiliteParametres.getComptabiliteParameters().forEach(parameter -> {
-//            ComptabiliteInterne comptabiliteInterne = ComptabiliteInterne.builder()
-//                    .parametre(parameter)
-//                    .valeur(0.0)
-//                    .build();
-//            comptabiliteInterneRepository.save(comptabiliteInterne);
-//        });
-//    }
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    public void payProductReStock(List<PanierItemDto> panierItemDto){
+        var totalCharge = panierItemDto.stream().mapToDouble(item -> {
+            var presentation = presentationRepository.findByCodeCIP(item.getPresentationCip()).orElseThrow(PresentationNotFoundException::new);
+            return presentation.getPrixDeBase()*item.getQuantite();
+        }).sum();
+        this.cashTransaction(ComptabiliteParametres.CHARGES,totalCharge);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    public void cashTransaction(ComptabiliteParametres param, double prixTTC){
+        comptabiliteInterneRepository.findByParametre(param).ifPresentOrElse(comptabiliteInterne -> {
+            comptabiliteInterne.setValeur(comptabiliteInterne.getValeur()+prixTTC);
+            comptabiliteInterneRepository.save(comptabiliteInterne);
+        }, () -> initComptabiliteParametre(param,prixTTC));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    public void initComptabiliteParametre(ComptabiliteParametres parametre, double value){
+        ComptabiliteInterne comptabiliteInterne = ComptabiliteInterne.builder()
+                .parametre(parametre)
+                .valeur(value)
+                .build();
+        comptabiliteInterneRepository.save(comptabiliteInterne);
+    }
+
 
 }

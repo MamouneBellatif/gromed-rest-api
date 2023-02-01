@@ -14,7 +14,7 @@ import java.util.Map;
 @Data
 public class Facture implements Serializable {
 
-    private String id_panier;
+    private Long idPanier;
     private Double montant;
     private LocalDateTime date;
     private String nomClient;

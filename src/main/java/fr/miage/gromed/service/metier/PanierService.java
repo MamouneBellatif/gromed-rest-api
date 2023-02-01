@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 //Repasser sur les autorisations d'achat
 @Service
-public class PanierService {
+public class PanierService implements PanierServiceInterface {
 
     private final PanierRepository panierRepository;
 
@@ -33,20 +33,14 @@ public class PanierService {
     private final PanierMapper panierMapper;
 
     private final PanierItemMapper panierItemMapper;
-
-    private final PanierCleanExpired panierCleanExpired;
-    private final TaskScheduler taskScheduler;
     private final PanierItemRepository panierItemRepository;
 
     @Autowired
-    public PanierService(TaskScheduler taskScheduler, PanierItemMapper panierItemMapper, PanierRepository panierRepository, StockService stockService, PanierMapper panierMapper, PanierCleanExpired panierCleanExpired, PanierItemRepository panierItemRepository, PresentationRepository presentationRepository, ComptabiliteInterneService comptabiliteInterneService, CommandeTypeRepository commandeTypeRepository, CommandeTypeMapper commandeTypeMapper) {
+    public PanierService(PanierItemMapper panierItemMapper, PanierRepository panierRepository, StockService stockService, PanierMapper panierMapper, PanierItemRepository panierItemRepository, PresentationRepository presentationRepository, ComptabiliteInterneService comptabiliteInterneService, CommandeTypeRepository commandeTypeRepository, CommandeTypeMapper commandeTypeMapper) {
         this.panierRepository = panierRepository;
         this.stockService = stockService;
         this.panierMapper = panierMapper;
         this.panierItemMapper = panierItemMapper;
-        this.taskScheduler = taskScheduler;
-//        this.panierCleanExpired = panierCleanExpired;
-        this.panierCleanExpired = panierCleanExpired;
         this.panierItemRepository = panierItemRepository;
         this.presentationRepository = presentationRepository;
         this.comptabiliteInterneService = comptabiliteInterneService;
@@ -57,12 +51,8 @@ public class PanierService {
 
     @Transactional(rollbackFor = Exception.class)
     public PanierDto getPanier(Long idPanier) {
-        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
-        Optional<Panier> panierOpt = panierRepository.findById(idPanier);
-        if(panierOpt.isEmpty()) {
-            throw new PanierNotFoundException();
-        }
-        Panier panier = panierOpt.get();
+        Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
+        checkUser(panier);
         checkExpiredPanier(panier);
         return panierMapper.toDto(panier);
     }
@@ -74,9 +64,7 @@ public class PanierService {
             return false;
         }
         Panier panier = panierOpt.get();
-        panier.getItems().forEach(panierItem -> {
-            stockService.updateStock(panierItem.getPresentation(), - panierItem.getQuantite(), true, true);
-        });
+        panier.getItems().forEach(panierItem -> stockService.updateStock(panierItem.getPresentation(), - panierItem.getQuantite(), true, true));
         panierRepository.delete(panier);
         return true;
     }
@@ -94,8 +82,6 @@ public class PanierService {
 
     private boolean hasActivePanier(Utilisateur utilisateur) {
         return panierRepository.existsByClientAndExpiresAtAfterAndPaidFalse(utilisateur, LocalDateTime.now());
-//        Optional<Panier> panierOpt = panierRepository.findByClientAndExpiresAtAfterAndPaidFalseAndCanceledFalse(utilisateur, LocalDateTime.now());
-//        return panierOpt.isPresent();
     }
 
     @Autowired
@@ -353,8 +339,7 @@ public class PanierService {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean removeItem(Long presentationCip){
-        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
-        if (hasActifPanier(utilisateur)){
+        if (hasActifPanier()){
             throw new PanierNotFoundException();
         }
         Panier panier = this.getCurrentPanier();
@@ -384,9 +369,12 @@ public class PanierService {
     final
     ComptabiliteInterneService comptabiliteInterneService;
 
-    private boolean checkUser(Panier panier) {
+    @Transactional(rollbackFor = Exception.class)
+    public void checkUser(Panier panier) {
         Utilisateur utilisateur = UserContextHolder.getUtilisateur();
-        return panier.getClient().getId().equals(utilisateur.getId());
+         if (panier.getClient().getId().equals(utilisateur.getId())){
+             throw new WrongUserException();
+         }
     }
     @Transactional(rollbackFor = Exception.class)
     public Object confirmPanier() {
@@ -426,7 +414,7 @@ public class PanierService {
         return commandeTypeRepository.findAllByPanierClient(UserContextHolder.getUtilisateur()).stream().map(commandeTypeMapper::toDto).collect(Collectors.toSet());
     }
 
-    public boolean hasActifPanier(Utilisateur utilisateur) {
+    public boolean hasActifPanier() {
         return panierRepository.existsByClientAndExpiresAtAfterAndPaidFalseAndCanceledFalse(UserContextHolder.getUtilisateur(), LocalDateTime.now());
     }
 
