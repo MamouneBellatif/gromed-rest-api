@@ -9,10 +9,14 @@ import org.springframework.context.annotation.Configuration;
 public class FirebBaseAuthConfig {
 
 
+    @Autowired
+    private AuthFilter authFilter;
+
         @Bean
         public FilterRegistrationBean<AuthFilter> firebaseAuthFilter() {
             FilterRegistrationBean<AuthFilter> registrationBean = new FilterRegistrationBean<>();
-            registrationBean.setFilter(new AuthFilter());
+//            registrationBean.setFilter(new AuthFilter());
+            registrationBean.setFilter(authFilter);
             registrationBean.addUrlPatterns("/api/*");
             return registrationBean;
         }

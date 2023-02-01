@@ -25,9 +25,12 @@ public class AuthFilter implements Filter {
 
 Logger logger = Logger.getLogger(AuthFilter.class.getName());
 
-    @Autowired
-    UtilisateurService utilisateurService;
+    private UtilisateurService utilisateurService;
 
+    @Autowired
+    public AuthFilter(UtilisateurService utilisateurService) {
+        this.utilisateurService = utilisateurService;
+    }
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, jakarta.servlet.FilterChain chain) throws IOException, jakarta.servlet.ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
@@ -62,7 +65,7 @@ Logger logger = Logger.getLogger(AuthFilter.class.getName());
 
         try {
             UserRecord userRecord = FirebaseAuth.getInstance(FirebaseApp.getInstance("gromed-3c731")).getUser(idToken);
-            UserContextHolder.setUtilisateur(utilisateurService.syncUser(userRecord, UriComponentsBuilder.fromHttpRequest((HttpRequest) httpRequest).build().toUriString()));
+            UserContextHolder.setUtilisateur(utilisateurService.syncUser(userRecord, httpRequest.getRequestURL().toString()));
             chain.doFilter(request, response);
 //            FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
         } catch (FirebaseAuthException e) {
