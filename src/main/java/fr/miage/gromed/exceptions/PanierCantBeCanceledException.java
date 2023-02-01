@@ -1,8 +1,10 @@
 package fr.miage.gromed.exceptions;
 
-public class PanierCantBeCanceledException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class PanierCantBeCanceledException extends CustomException {
 
         public PanierCantBeCanceledException() {
-            super("delais_annulation_depasse");
+            super("delais_annulation_depasse", HttpStatus.NOT_ACCEPTABLE);
         }
 }

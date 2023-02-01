@@ -1,8 +1,10 @@
 package fr.miage.gromed.exceptions;
 
 
-public class AucunPanierActifException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class AucunPanierActifException extends CustomException {
     public AucunPanierActifException() {
-        super("aucun_panier_actif");
+        super("aucun_panier_actif", HttpStatus.BAD_REQUEST);
     }
 }

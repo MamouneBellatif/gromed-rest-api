@@ -1,14 +1,18 @@
 package fr.miage.gromed.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
-public class Facture {
+@Setter
+@Getter
+@Data
+public class Facture implements Serializable {
 
     private String id_panier;
     private Double montant;

@@ -85,13 +85,17 @@ public class PanierService {
 
 
     private PanierItemDto sanitizeItemsInput(PanierItemDto panierItemDto) {
+        if (panierItemDto.getQuantite() < 0) {
+            throw new NegativeQuantityException();
+        }
         panierItemDto.setQuantite(panierItemDto.getQuantite() > 0 ? panierItemDto.getQuantite() : 1);
         return panierItemDto;
     }
 
     private boolean hasActivePanier(Utilisateur utilisateur) {
-        Optional<Panier> panierOpt = panierRepository.findByClientAndExpiresAtAfterAndPaidFalseAndCanceledFalse(utilisateur, LocalDateTime.now());
-        return panierOpt.isPresent();
+        return panierRepository.existsByClientAndExpiresAtAfterAndPaidFalse(utilisateur, LocalDateTime.now());
+//        Optional<Panier> panierOpt = panierRepository.findByClientAndExpiresAtAfterAndPaidFalseAndCanceledFalse(utilisateur, LocalDateTime.now());
+//        return panierOpt.isPresent();
     }
 
     @Autowired
@@ -102,7 +106,6 @@ public class PanierService {
         Utilisateur utilisateur = UserContextHolder.getUtilisateur();
         if (hasActivePanier(utilisateur)) {
             return this.addToPanier(getCurrentPanier().getId(), itemDtoSet);
-//            throw new HasActivePanierException();
         }
         Panier panier = Panier.builder()
                         .dateCreation(LocalDateTime.now())
@@ -235,15 +238,16 @@ public class PanierService {
 
 
     public boolean checkExpiredPanier(Panier panier) {
-//        return panier.isExpired();
-        LocalDateTime expirationDate = LocalDateTime.now();
-        if (panier.getExpiresAt().isBefore(expirationDate) && !panier.isExpired()) {
+        LocalDateTime now = LocalDateTime.now();
+        if (panier.getExpiresAt().isBefore(now) && !panier.isExpired()) {
             stockService.resetStockLogique(panier);
             panier.setExpired(true);
             panierRepository.save(panier);
-
+            return true;
         }
-           return panier.isExpired();
+        panier.setExpired(false);
+        panierRepository.save(panier);
+        return false;
 
     }
 
@@ -267,21 +271,22 @@ public class PanierService {
 //    }
 
 
-    private Runnable expirePanier(Panier panier) {
-        return new Runnable(){
-            @Override
-            public void run() {
-                if (!panier.isPaid()) {
-                    stockService.resetStockLogique(panier);
-                    panier.setExpired(true);
-                    panierRepository.save(panier);
-                }
-            }
-        };
-        }
+//    private Runnable expirePanier(Panier panier) {
+//        return new Runnable(){
+//            @Override
+//            public void run() {
+//                if (!panier.isPaid()) {
+//                    stockService.resetStockLogique(panier);
+//                    panier.setExpired(true);
+//                    panierRepository.save(panier);
+//                }
+//            }
+//        };
+//        }
 
-        //TODO: verifier conditions de ventes
-
+        //TODO: verifier conditions de ventes (presentation active + agrément)
+//TODO: recherche sur composant
+    //TODO: connrecter strioe
     public boolean isUserAllowedToBuy(PanierItem panierItem, Utilisateur utilisateur)
     {
         // Vérifier agrément du medicmaent et et etablissement de l'utilisateur (si Hopital)
@@ -303,22 +308,21 @@ public class PanierService {
         if (checkExpiredPanier(panier)) {
             throw new ExpiredPanierException();
         }
+        Set<PanierItem> items = panier.getItems();
         Presentation presentation = presentationRepository.findByCodeCIP(panierItemDto.getPresentationCip()).orElseThrow(PresentationNotFoundException::new);
-        PanierItem panierItem = panierItemRepository.findByPanier_IdAndPresentation_Id(
-                            panier.getId(),
-                            panierItemDto.getPresentationCip())
-                                .orElse(
-                                PanierItem.builder()
-                                .presentation(presentation)
-                                .panier(panier)
-                                .build());
-        panierItem.setQuantite(panierItem.getQuantite() + panierItemDto.getQuantite());//TODO: Ajouter ou remplacer la quantité ?
+        var isDoublon = items.stream().anyMatch(panierItem -> panierItem.getPresentation().getCodeCIP().equals(presentation.getCodeCIP()));
+
+        PanierItem panierItem = panierItemRepository.findByPanierAndPresentation(panier,presentation)
+                                .orElse(PanierItem.builder()
+                                                  .presentation(presentation)
+                                                  .panier(panier)
+                                                  .build());
+
+        panierItem.setQuantite(panierItemDto.getQuantite());
         stockService.updateStock(presentation, panierItemDto.getQuantite(), false, false);
-        if (panierItem.getId() == null) {
-            panierItemRepository.save(panierItem);
+        panierItemRepository.save(panierItem);
+        if (!isDoublon) {
             panier.addItem(panierItem);
-        }else {
-            panierItemRepository.save(panierItem);
         }
         if (panierItem.getQuantite() < 0 ) {
             panierItemRepository.delete(panierItem);
@@ -347,6 +351,36 @@ public class PanierService {
         return LocalDateTime.now().isBefore(cancelLimit);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeItem(Long presentationCip){
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+        if (hasActifPanier(utilisateur)){
+            throw new PanierNotFoundException();
+        }
+        Panier panier = this.getCurrentPanier();
+        Presentation presentation = presentationRepository.findByCodeCIP(presentationCip).orElseThrow(PresentationNotFoundException::new);
+        PanierItem panierItem = panierItemRepository.findByPanierAndPresentation(panier,presentation).orElseThrow(PanierItemNotFoundException::new);
+        panierItemRepository.delete(panierItem);
+        panier.getItems().remove(panierItem);
+        stockService.updateStock(presentation, panierItem.getQuantite(), true, true);
+        panierRepository.save(panier);
+        return true;
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public Panier getCurrentPanier() {
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+//        Panier panier = panierRepository.findByClientAndExpiresAtAfter(utilisateur, LocalDateTime.now()).orElseThrow(() -> {
+        Panier panier = panierRepository.findByClientAndExpiresAtAfterAndPaidFalseOrderByDateCreationDesc(utilisateur, LocalDateTime.now()).orElseThrow(() -> {
+            throw new AucunPanierActifException();
+        });
+        if(checkExpiredPanier(panier)) {
+            throw new ExpiredPanierException();
+        }
+        return panier;
+    }
+
     final
     ComptabiliteInterneService comptabiliteInterneService;
 
@@ -355,15 +389,8 @@ public class PanierService {
         return panier.getClient().getId().equals(utilisateur.getId());
     }
     @Transactional(rollbackFor = Exception.class)
-    public Object confirmPanier(Long idPanier) {
-        Panier panier = panierMapper.toEntity(getCurrentPanier());
-//        Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
-        if (!checkUser(panier)) {
-            throw new WrongUserException();
-        }
-        if (checkExpiredPanier(panier)) {
-            throw new ExpiredPanierException();
-        }
+    public Object confirmPanier() {
+        Panier panier = getCurrentPanier();
         if (panier.isPaid()) {
             throw new PanierAlreadyPaidException();
         }
@@ -376,8 +403,7 @@ public class PanierService {
         panier.setPaid(true);
         panier.setDatePaiement(LocalDateTime.now());
         panierRepository.save(panier);
-        comptabiliteInterneService.createFacture(panier);
-        return panierMapper.toDto(panier);
+        return comptabiliteInterneService.createFacture(panier);
     }
 
     final
@@ -404,7 +430,9 @@ public class PanierService {
         return panierRepository.existsByClientAndExpiresAtAfterAndPaidFalseAndCanceledFalse(UserContextHolder.getUtilisateur(), LocalDateTime.now());
     }
 
-    public PanierDto getCurrentPanier() {
+
+    @Transactional(rollbackFor = Exception.class)
+    public PanierDto getCurrentPanierDto() {
         Utilisateur utilisateur = UserContextHolder.getUtilisateur();
         Panier panier = panierRepository.findByClientAndExpiresAtAfter(utilisateur, LocalDateTime.now()).orElseThrow(() -> {
            throw new AucunPanierActifException();
@@ -416,8 +444,21 @@ public class PanierService {
     }
 
     public List<PanierDto> getHistorique() {
-Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
         return panierRepository.findByClientAndExpiresAtBefore(utilisateur, LocalDateTime.now()).stream().map(panierMapper::toDto).collect(Collectors.toList());
 
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeCurrentPanier() {
+        Utilisateur utilisateur = UserContextHolder.getUtilisateur();
+        Panier panier = panierRepository.findByClientAndExpiresAtAfter(utilisateur, LocalDateTime.now()).orElseThrow(() -> {
+            throw new AucunPanierActifException();
+        });
+        if (checkExpiredPanier(panier)) {
+            throw new ExpiredPanierException();
+        }
+        panierRepository.delete(panier);
+        return true;
     }
 }

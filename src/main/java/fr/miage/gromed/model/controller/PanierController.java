@@ -6,7 +6,6 @@ import fr.miage.gromed.dto.*;
 import fr.miage.gromed.exceptions.*;
 
 import fr.miage.gromed.service.UtilisateurService;
-import fr.miage.gromed.service.metier.PanierAlreadyPaidException;
 import jakarta.persistence.OptimisticLockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,20 +29,30 @@ public class PanierController {
         this.panierService = panierService;
     }
 
-    @GetMapping("/{idPanier}")
+    @GetMapping("/view/{idPanier}")
     public ResponseEntity<Object> getPanier(@PathVariable Long idPanier){
-            return ResponseHandler.generateResponse("panier en cours", HttpStatus.CREATED,  panierService.getPanier(idPanier));
+            return ResponseHandler.generateResponse("panier en cours", HttpStatus.OK,  panierService.getPanier(idPanier));
     }
 
     @GetMapping("/")
     public ResponseEntity<Object> getCurrentPanier(@RequestParam String idUser){
-            return ResponseHandler.generateResponse("panier en cours", HttpStatus.OK,  panierService.getCurrentPanier());
+            return ResponseHandler.generateResponse("panier en cours", HttpStatus.OK,  panierService.getCurrentPanierDto());
     }
 
-    @PutMapping("/add/{idPanier}")
-    public ResponseEntity<Object> addToPanier(@PathVariable Long idPanier, @RequestBody PanierItemDto panierItemDto){
-            return ResponseHandler.generateResponse("item ajouté", HttpStatus.OK,  panierService.addToPanier(idPanier, panierItemDto));
+    @DeleteMapping(value = "/remove/item/{presentationCip}")
+    public ResponseEntity<Object> addPanier(@PathVariable Long presentationCip){
+            return ResponseHandler.generateResponse("panier ajouté", HttpStatus.CREATED,  panierService.removeItem(presentationCip));
     }
+
+    @DeleteMapping(value = "/remove/panier")
+    public ResponseEntity<Object> addPanier(){
+        return ResponseHandler.generateResponse("panier ajouté", HttpStatus.CREATED,  panierService.removeCurrentPanier());
+    }
+
+//    @PutMapping("/add/{idPanier}")
+//    public ResponseEntity<Object> addToPanier(@PathVariable Long idPanier, @RequestBody PanierItemDto panierItemDto){
+//            return ResponseHandler.generateResponse("item ajouté", HttpStatus.OK,  panierService.addToPanier(idPanier, panierItemDto));
+//    }
 
     @PutMapping("/cancel/{idPanier}")
     public ResponseEntity<Object> cancelPanier(@PathVariable Long idPanier){
@@ -63,15 +72,14 @@ public class PanierController {
     /**
      * Creer un panier avec un item, retourne le panier ou un message d'alerte
      */
-    @PostMapping("/create")
+    @PostMapping("/add")
     public ResponseEntity<Object> createPanier(@RequestBody PanierItemDto panierItemDto){
-            return ResponseHandler.generateResponse("Nouveau panier OK", HttpStatus.CREATED, panierService.createPanier(panierItemDto));
+            return ResponseHandler.generateResponse("Produit ajouté", HttpStatus.CREATED, panierService.createPanier(panierItemDto));
     }
 
     @PutMapping("/confirm")
-    public ResponseEntity<Object> confirmPanier(@PathVariable Long idPanier){
-//            PanierDto panierDto = panierService.confirmPanier(idPanier);
-            return ResponseHandler.generateResponse("Panier confirmé", HttpStatus.OK, panierService.confirmPanier(idPanier));
+    public ResponseEntity<Object> confirmPanier(){
+            return ResponseHandler.generateResponse("Panier confirmé", HttpStatus.OK, panierService.confirmPanier());
     }
 
     @PutMapping("/commandeType/{idPanier}")
@@ -94,41 +102,41 @@ public class PanierController {
     @Autowired
     private UtilisateurService utilisateurService;
 
-    @ExceptionHandler(StockIndisponibleException.class)
-    public ResponseEntity<Object> handleStockIndisponibleException(StockIndisponibleException e) {
-        utilisateurService.await();
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.MULTIPLE_CHOICES);
-    }
+//    @ExceptionHandler(StockIndisponibleException.class)
+//    public ResponseEntity<Object> handleStockIndisponibleException(StockIndisponibleException e) {
+//        utilisateurService.await();
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.MULTIPLE_CHOICES);
+//    }
 
     @ExceptionHandler(OptimisticLockException.class)
     public ResponseEntity<Object> handleOptimisticLockException(OptimisticLockException e) {
         return ResponseHandler.generateFailureResponse("Le panier a été modifié par un autre utilisateur", HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Object> handleException(PanierAlreadyPaidException e) {
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    }
+//    @ExceptionHandler
+//    public ResponseEntity<Object> handleException(PanierAlreadyPaidException e) {
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+//    }
 
     @ExceptionHandler
     public ResponseEntity<Object> handleCustomException(CustomException e) {
         return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @ExceptionHandler(ExpiredPanierException.class)
-    public ResponseEntity<Object> expiredExceptionHandler(ExpiredPanierException e) {
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.GONE);
-    }
+//    @ExceptionHandler(ExpiredPanierException.class)
+//    public ResponseEntity<Object> expiredExceptionHandler(ExpiredPanierException e) {
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.GONE);
+//    }
 
-    @ExceptionHandler(PresentationNotFoundException.class)
-    public ResponseEntity<Object> presentationNotFoundExceptionHandler(PresentationNotFoundException e) {
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
+//    @ExceptionHandler(PresentationNotFoundException.class)
+//    public ResponseEntity<Object> presentationNotFoundExceptionHandler(PresentationNotFoundException e) {
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+//    }
 
-    @ExceptionHandler(PanierNotFoundException.class)
-    public ResponseEntity<Object> panierNotFoundExceptionHandler(PanierNotFoundException e) {
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
+//    @ExceptionHandler(PanierNotFoundException.class)
+//    public ResponseEntity<Object> panierNotFoundExceptionHandler(PanierNotFoundException e) {
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+//    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> exceptionHandler(Exception e) {
@@ -136,19 +144,19 @@ public class PanierController {
         return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(PanierCantBeCanceledException.class)
-    public ResponseEntity<Object> panierCantBeCanceledExceptionHandler(PanierCantBeCanceledException e) {
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    }
+//    @ExceptionHandler(PanierCantBeCanceledException.class)
+//    public ResponseEntity<Object> panierCantBeCanceledExceptionHandler(PanierCantBeCanceledException e) {
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+//    }
 
-    @ExceptionHandler(PanierAlreadyPaidException.class)
-    public ResponseEntity<Object> panierAlreadyPaidException(PanierCantBeCanceledException e) {
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    }
-    @ExceptionHandler(PanierCanceledException.class)
-    public ResponseEntity<Object> panierAlreadyPaidException(PanierCanceledException e) {
-        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    }
+//    @ExceptionHandler(PanierAlreadyPaidException.class)
+//    public ResponseEntity<Object> panierAlreadyPaidException(PanierCantBeCanceledException e) {
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+//    }
+//    @ExceptionHandler(PanierCanceledException.class)
+//    public ResponseEntity<Object> panierAlreadyPaidException(PanierCanceledException e) {
+//        return ResponseHandler.generateFailureResponse(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+//    }
 
     public ResponseEntity<Object> getCommandeType(@PathVariable Long idPanier){
         return null;

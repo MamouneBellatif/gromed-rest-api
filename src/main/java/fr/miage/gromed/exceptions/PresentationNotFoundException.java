@@ -1,7 +1,9 @@
 package fr.miage.gromed.exceptions;
 
-public class PresentationNotFoundException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+
+public class PresentationNotFoundException extends CustomException{
     public PresentationNotFoundException() {
-        super("presentation_not_found");
+        super("presentation_not_found", HttpStatus.NOT_FOUND);
     }
 }

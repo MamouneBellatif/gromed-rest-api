@@ -33,7 +33,7 @@ public class UtilisateurService {
         Utilisateur user = utilisateurRepository.findById(userRecord.getUid()).orElse(registerUtilisateur(userRecord));
         if (user.isAwaitingResponse() && !route.contains("resolve")) {
             user.setAwaitingResponse(false);
-//            panierService.getCurrentPanier()
+//            panierService.getCurrentPanierDto()
         }
         return user;
     }

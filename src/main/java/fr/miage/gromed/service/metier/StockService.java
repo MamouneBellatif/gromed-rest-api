@@ -1,6 +1,5 @@
 package fr.miage.gromed.service.metier;
 
-import fr.miage.gromed.exceptions.PanierNotFoundException;
 import fr.miage.gromed.exceptions.StockIndisponibleException;
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.Stock;
@@ -32,6 +31,7 @@ public class StockService {
 
     private final ApplicationEventPublisher publisher;
 
+    @Autowired
     public StockService(StockRepository stockRepository, PanierRepository panierRepository, PresentationRepository presentationRepository, ApplicationEventPublisher publisher) {
         this.stockRepository = stockRepository;
         this.panierRepository = panierRepository;
@@ -59,7 +59,7 @@ public class StockService {
             throw new StockIndisponibleException(presentation.getCodeCIP(), quantity);
         }
         stock.setQuantiteStockLogique(newQuantity);
-        if (isLogicalStock && stock.getQuantiteStockLogique() < Stock.SEUIL) {
+        if ((isLogicalStock && stock.getQuantiteStockLogique() < Stock.SEUIL) || (!isLogicalStock && stock.getQuantiteStockPhysique() < Stock.SEUIL )){
             stock.setRestockAlertFlag(true);
         }
         stockRepository.save(stock);
@@ -83,9 +83,10 @@ public class StockService {
     Logger logger = Logger.getLogger(StockService.class.getName());
 
     @Scheduled(fixedRate = 30, timeUnit = TimeUnit.MINUTES)
+    @Transactional(rollbackFor = Exception.class)
     public void cleanExpiredCarts() {
         logger.info("Cleaning expired carts");
-        List<Panier> expiredCarts = panierRepository.findAllByExpiresAtAfterAndExpired(LocalDateTime.now(), false);
+        List<Panier> expiredCarts = panierRepository.findAllByExpiresAtBeforeAndExpired(LocalDateTime.now(), false);
         this.resetStockLogique(expiredCarts);
         expiredCarts.forEach(panier -> {
             panier.setExpired(true);

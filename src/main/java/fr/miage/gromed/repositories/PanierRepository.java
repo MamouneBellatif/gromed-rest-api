@@ -25,13 +25,17 @@ public interface PanierRepository extends JpaRepository<Panier, Long> {
     Panier findByItemsId(Long idItem);
 
 //    List<Panier> findAllByDateExpirationAfter(LocalDateTime now);
-    List<Panier> findAllByExpiresAtAfterAndExpired(LocalDateTime now, boolean expired);
+    List<Panier> findAllByExpiresAtBeforeAndExpired(LocalDateTime now, boolean expired);
 
     List<Panier> findByClientId(String string);
 
-    Optional<Panier> findByClientAndExpiresAtBefore(Utilisateur utilisateur, LocalDateTime now);
+    List<Panier> findByClientAndExpiresAtBefore(Utilisateur utilisateur, LocalDateTime now);
 
     List<Panier> findByClient(Utilisateur utilisateur);
 
     Optional<Panier> findByClientAndExpiresAtAfter(Utilisateur utilisateur, LocalDateTime now);
+    Optional<Panier> findByClientAndExpiresAtAfterAndPaidFalseOrderByDateCreationDesc(Utilisateur utilisateur, LocalDateTime now);
+
+    boolean existsByClientAndExpiresAtAfterAndPaidFalse(Utilisateur utilisateur, LocalDateTime time);
+
 }

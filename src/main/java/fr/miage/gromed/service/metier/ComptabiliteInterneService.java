@@ -30,12 +30,14 @@ public class ComptabiliteInterneService {
             // TODO
         }
 
-      @Transactional
+      @Transactional(rollbackFor = Exception.class)
       @Lock(LockModeType.PESSIMISTIC_WRITE)
       public Facture createFacture(Panier panier) {
         // TODO générer la facture en dto pour génerer pdf en front
           Set<PanierItem> panierItems = panier.getItems();
-          final var prixTotal = panier.getItems().stream().mapToDouble(item -> item.getPresentation().getPrixDeBase()+item.getPresentation().getHonoraireRemboursement()).sum();
+          //get the total price of the basket (price of the product + refund fee times the quantity)
+          var prixTotal = panierItems.stream().mapToDouble(item -> (item.getPresentation().getPrixDeBase()+item.getPresentation().getHonoraireRemboursement())* item.getQuantite()).sum();
+
           comptabiliteInterneRepository.findByParametre(CHIFFRE_AFFAIRE).ifPresentOrElse(comptabiliteInterne -> {
               comptabiliteInterne.setValeur(comptabiliteInterne.getValeur()+prixTotal);
               comptabiliteInterneRepository.save(comptabiliteInterne);
