@@ -3,6 +3,7 @@ package fr.miage.gromed.service.metier;
 import fr.miage.gromed.model.Stock;
 import fr.miage.gromed.model.enums.NatureComposant;
 import fr.miage.gromed.model.enums.TypeAvis;
+import fr.miage.gromed.model.enums.TypeGenerique;
 import fr.miage.gromed.model.enums.ValeurAvis;
 import fr.miage.gromed.model.medicament.*;
 import fr.miage.gromed.repositories.ConditionPrescriptionRepository;
@@ -84,6 +85,29 @@ public class PopulateService {
         medicamentRepository.saveAll(medicaments);
     }
 
+    public void parseGenerique(){
+        medicalDataParser.initGenerique("src/main/resources/data/CIS_GENER_bdpm.txt");
+        List<DataWrapper> list = medicalDataParser.parseGenerique();
+        List<Medicament> medicaments = medicamentRepository.findAll();
+        Map<Integer, Medicament> medicamentMap = medicaments.stream().collect(Collectors.toMap(Medicament::getCodeCIS, medicament -> medicament));
+        list.forEach(data -> {
+            System.out.println(data.data.get("CIS"));
+            try{
+                TypeGenerique typeGenerique = TypeGenerique.fromPosition(Integer.parseInt(data.data.get("type_generique")));
+                Medicament medicament = medicamentMap.get(Integer.parseInt(data.data.get("CIS")));
+                GroupeGenerique groupeGenerique = GroupeGenerique.builder()
+                                .typeGeneriqueEnum(typeGenerique)
+                                .codeGenerique(data.data.get("id_generique"))
+                                .denominationGenerique(data.data.get("denomination_generique"))
+                                .build();
+                medicament.getGroupeGeneriqueList().add(groupeGenerique);
+            } catch (Exception e){
+                logger.info("parseGenerique: "+e.getMessage());
+            }
+        });
+        medicamentRepository.saveAll(medicaments);
+    }
+
     public void parseCisLibelle(){
         medicalDataParser.initMedicament("src/main/resources/data/CIS_bdpm.txt");
 
@@ -125,6 +149,7 @@ public class PopulateService {
             return value.split(",")[0];
         }
     }
+
 
         //use medicalDataParser to parse CIS_CIP_bdpm.txt and save the result in the database accordingly to the model using medicamentRepository CIS as foreign key
 

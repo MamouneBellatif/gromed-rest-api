@@ -19,6 +19,7 @@ public class RestockFaker {
         @Scheduled(cron ="0 0 0 * * *")
         @Transactional
     public void restock() {
+        log.info("restockage");
         List<Stock> toRestock = stockRepository.findByRestockAlertFlagTrue();
         toRestock.forEach(stock -> {
             Double prix = stock.getPresentation().getPrixDeBase()-0.5;

@@ -22,6 +22,13 @@ public class PopulateController {
         return "fichier generé";
     }
 
+    @GetMapping("/generique")
+     public String populateGenerique() {
+        populateService.parseGenerique();
+        return "generique generé";
+    }
+
+
     @GetMapping("/populate")
     public String populateAll(){
         populateService.populateMedicament();
@@ -34,7 +41,13 @@ public class PopulateController {
         return "pres populate";
     }
 
-    @GetMapping("populUrls")
+    @GetMapping("/populatePres")
+    public String populatePres(){
+        populateService.initStock();
+        return "stock init";
+    }
+
+    @GetMapping("/populUrls")
     public String populateUrls(){
         populateService.populateUrls();
         return "urls populate";

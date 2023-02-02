@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -30,11 +31,31 @@ public class PanierMapper implements EntityMapper<PanierDto, Panier> {
         logger.info("PanierMapper.toDto: listItems = "+listItems.size());
         List<PanierItemDto> listItemsDto = listItems.stream().map(item -> panierItemMapper.toDto(item)).toList();
         logger.info("PanierMapper.toDto: listItemsDto = "+listItemsDto.size());
+
         return PanierDto.builder()
                 .id(entity.getId())
                 .items(listItemsDto)
                 .dateCreation(entity.getDateCreation())
+                .expiresAt(entity.getExpiresAt())
+                .status(this.getStatus(entity))
                 .build();
+    }
+
+    private String getStatus(Panier entity){
+        var isActif = entity.getExpiresAt().isAfter(LocalDateTime.now()) && !entity.isPaid() && !entity.isCanceled() && !entity.isExpired();;
+        if (isActif) return "Actif";
+        if(entity.isExpired()) return "Expiré";
+        if(entity.isPaid()) return "Payé";
+        if(entity.isCanceled()) return "Annulé";
+        if(entity.isDelivered()) return "Livré";
+        if(entity.isPaid() && !entity.isDelivered()) return "En cours de livraison";
+        return "";
+    }
+
+    public PanierDto toDtoCreation(Panier entity, String status){
+        PanierDto pDto = this.toDto(entity);
+        pDto.setStatus(status);
+        return pDto;
     }
 
     @Override

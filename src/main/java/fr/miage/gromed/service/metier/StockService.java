@@ -1,6 +1,5 @@
 package fr.miage.gromed.service.metier;
 
-import fr.miage.gromed.exceptions.PanierNotFoundException;
 import fr.miage.gromed.exceptions.StockIndisponibleException;
 import fr.miage.gromed.model.Panier;
 import fr.miage.gromed.model.Stock;
@@ -8,8 +7,10 @@ import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.PanierRepository;
 import fr.miage.gromed.repositories.PresentationRepository;
 import fr.miage.gromed.repositories.StockRepository;
+import fr.miage.gromed.service.listeners.StockUpdateEvent;
 import jakarta.persistence.LockModeType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,18 +20,24 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 @Service
 public class StockService {
 
-    @Autowired
-    private StockRepository stockRepository;
-    @Autowired
-    private PanierRepository panierRepository;
-    @Autowired
-    private PresentationRepository presentationRepository;
+    private final StockRepository stockRepository;
+    private final PanierRepository panierRepository;
+    private final PresentationRepository presentationRepository;
 
+    private final ApplicationEventPublisher publisher;
 
+    @Autowired
+    public StockService(StockRepository stockRepository, PanierRepository panierRepository, PresentationRepository presentationRepository, ApplicationEventPublisher publisher) {
+        this.stockRepository = stockRepository;
+        this.panierRepository = panierRepository;
+        this.presentationRepository = presentationRepository;
+        this.publisher = publisher;
+    }
 
     public static void checkStockDisponible(Panier panier) {
         panier.getItems().forEach(panierItem -> {
@@ -39,6 +46,8 @@ public class StockService {
             }
         });
     }
+
+
 
     @Transactional(rollbackFor = Exception.class)
     @Lock(LockModeType.OPTIMISTIC)
@@ -50,13 +59,13 @@ public class StockService {
             throw new StockIndisponibleException(presentation.getCodeCIP(), quantity);
         }
         stock.setQuantiteStockLogique(newQuantity);
-        if (isLogicalStock && stock.getQuantiteStockLogique() < Stock.SEUIL) {
+        if ((isLogicalStock && stock.getQuantiteStockLogique() < Stock.SEUIL) || (!isLogicalStock && stock.getQuantiteStockPhysique() < Stock.SEUIL )){
             stock.setRestockAlertFlag(true);
         }
         stockRepository.save(stock);
         presentationRepository.save(presentation);
-
-        }
+        publisher.publishEvent(new StockUpdateEvent(stock));
+    }
 
     @Transactional
     public void resetStockLogique(List<Panier> expiredCarts) {
@@ -68,11 +77,16 @@ public class StockService {
         panier.getItems().forEach(panierItem -> {
             this.updateStock(panierItem.getPresentation(), panierItem.getQuantite(), true, true);
         });
+
     }
 
+    Logger logger = Logger.getLogger(StockService.class.getName());
+
     @Scheduled(fixedRate = 30, timeUnit = TimeUnit.MINUTES)
+    @Transactional(rollbackFor = Exception.class)
     public void cleanExpiredCarts() {
-        List<Panier> expiredCarts = panierRepository.findAllByExpiresAtAfterAndExpired(LocalDateTime.now(), false);
+        logger.info("Cleaning expired carts");
+        List<Panier> expiredCarts = panierRepository.findAllByExpiresAtBeforeAndExpired(LocalDateTime.now(), false);
         this.resetStockLogique(expiredCarts);
         expiredCarts.forEach(panier -> {
             panier.setExpired(true);
@@ -80,20 +94,4 @@ public class StockService {
         });
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void addToPanier(Long panierId, Presentation presentation, int quantity) {
-        Stock stock = presentation.getStock();
-        if (stock.getQuantiteStockLogique() < quantity) {
-            throw new StockIndisponibleException(presentation.getCodeCIP(), quantity);
-        }
-        stock.setQuantiteStockLogique(stock.getQuantiteStockLogique() - quantity);
-        Optional<Panier> panierOpt = panierRepository.findById(panierId);
-        if (panierOpt.isEmpty()) {
-            throw new PanierNotFoundException();
-        }
-        Panier panier = panierOpt.get();
-        stockRepository.save(stock);
-//        panier.addItem(new PanierItem(stock.getPresentation(), quantity));
-//        panierRepository.save(panier);
-    }
 }

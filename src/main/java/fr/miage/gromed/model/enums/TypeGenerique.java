@@ -21,5 +21,13 @@ public enum TypeGenerique {
         return TypeGenerique.values()[position];
     }
 
+    public static TypeGenerique fromLibelle(String libelle) {
+        for (TypeGenerique typeGenerique : TypeGenerique.values()) {
+            if (typeGenerique.libelle.equals(libelle)) {
+                return typeGenerique;
+            }
+        }
+        return null;
+    }
 
 }

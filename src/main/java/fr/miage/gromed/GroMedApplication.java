@@ -22,21 +22,23 @@ public class GroMedApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(GroMedApplication.class, args);
-		try {
+		initFireBase();
+	}
 
+	private static void initFireBase() {
+		try {
 			FirebaseOptions options = FirebaseOptions.builder()
 					.setCredentials(GoogleCredentials.fromStream(new FileInputStream("src/main/resources/gromed-3c731-firebase-adminsdk-sxq2j-4582cb1de5.json")))
                         .setDatabaseUrl("https://gromed-3c731-default-rtdb.europe-west1.firebasedatabase.app")
 					.build();
-			log.info("Firebase initialized" + options.toString());
-			System.out.println(options.getProjectId());
+			log.info("Firebase initialized");
 			if(FirebaseApp.getApps().isEmpty()) { //<--- check with this line
-			System.out.println(FirebaseApp.getApps().size());
 				FirebaseApp.initializeApp(options,"gromed-3c731");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
 
 }

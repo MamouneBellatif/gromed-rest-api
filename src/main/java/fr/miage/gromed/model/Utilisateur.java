@@ -5,6 +5,8 @@ import fr.miage.gromed.model.enums.PerimetreUtilisateur;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Setter
 @Builder
@@ -17,7 +19,7 @@ public class Utilisateur {
     @Column(name = "user_id", nullable = false)
     private String id;
 
-    @Column(nullable = false)
+    @Column
     private String nom;
 
     @Column( unique = true)
@@ -33,5 +35,15 @@ public class Utilisateur {
     @Column
     @Enumerated(EnumType.STRING)
     private PerimetreUtilisateur perimetre;
+
+    @Column
+    private boolean awaitingResponse;
+
+    @Column
+    private boolean isBuying;
+
+    @ElementCollection
+    private List<String> notifications;
+
 
 }

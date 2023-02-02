@@ -13,7 +13,7 @@ public class AlerteStockDecisionDto {
 
     //panier ItemDto ou PanierDto (exclusif)
     private PanierItemDto panierItemDto;
-    private PanierDto panierDto;
+    private Long panierId;
 
     public boolean isAccept() {
        return decision == AlerteDecision.DELAI_LIVRAISON;

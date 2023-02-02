@@ -22,7 +22,7 @@ public class Panier implements AbstractEntity<Long> {
 
 
 //    @JoinColumn(name = "panier_id_fk", referencedColumnName = "panier_id")
-    @OneToMany(mappedBy="panier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER ,mappedBy="panier", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PanierItem> items;
 
     //date with hour and minute
@@ -33,10 +33,13 @@ public class Panier implements AbstractEntity<Long> {
     private LocalDateTime dateCreation;
 
     @Column
-    private boolean isPaid;
+    private boolean paid;
 
     @Column
-    private boolean isCanceled;
+    private boolean canceled;
+
+    @Column
+    private boolean awaitingResponse;
 
     @Column
     private boolean expired;
@@ -46,8 +49,8 @@ public class Panier implements AbstractEntity<Long> {
     private Utilisateur client;
 
     //    @Temporal(TemporalType.TIMESTAMP)
-    @Column
-    private Date datePaiement;
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime datePaiement;
 
 
     @Column
@@ -60,7 +63,7 @@ public class Panier implements AbstractEntity<Long> {
     private boolean isShipped;
 
     @Column
-    private boolean isDelivered;
+    private boolean delivered;
 
     @Column
     private boolean delayed;
