@@ -1,6 +1,6 @@
-package fr.miage.gromed.model.controller;
+package fr.miage.gromed.controller;
 
-import fr.miage.gromed.model.controller.customResponse.AbstractResponseEntity;
+import fr.miage.gromed.controller.customResponse.AbstractResponseEntity;
 import fr.miage.gromed.dto.PanierDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

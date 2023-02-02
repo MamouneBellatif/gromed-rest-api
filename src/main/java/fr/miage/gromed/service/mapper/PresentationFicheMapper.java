@@ -4,8 +4,11 @@ import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.dto.PresentationFicheDto;
 import fr.miage.gromed.model.medicament.Medicament;
 import fr.miage.gromed.model.medicament.Presentation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import javax.naming.RefAddr;
 import java.util.List;
 import java.util.Set;
 
@@ -40,12 +43,16 @@ public class PresentationFicheMapper implements EntityMapper<PresentationFicheDt
 
     @Override
     public List<PresentationFicheDto> toDto(List<Presentation> entityList) {
-        return null;
+        return entityList.stream().map(this::toDto).toList();
     }
 
     @Override
     public Set<PresentationFicheDto> toDto(Set<Presentation> entityList) {
         return null;
+    }
+
+    public List<PresentationFicheDto> toListDto(Page<Presentation> pres, Pageable five) {
+        return pres.stream().map(this::toDto).toList();
     }
 }
 

@@ -36,6 +36,8 @@ public class PanierItemMapper implements EntityMapper<PanierItemDto, PanierItem>
     public PanierItemDto toDto(PanierItem entity) {
         return PanierItemDto.builder()
                 .quantite(entity.getQuantite())
+                .prix(entity.getPresentation().getHonoraireRemboursement()+entity.getPresentation().getPrixDeBase())
+                .presentationDenomination(entity.getPresentation().getLibelle()+" "+entity.getPresentation().getMedicament().getDenomination())
                 .presentationCip(entity.getPresentation().getCodeCIP())
                 .build();
     }

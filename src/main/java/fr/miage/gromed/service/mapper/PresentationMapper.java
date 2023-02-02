@@ -52,4 +52,8 @@ public class PresentationMapper implements EntityMapper<PresentationDto, Present
     public Set<PresentationDto> toDto(Set<Presentation> entityList) {
         return null;
     }
+
+    public List<PresentationDto> toListDto(Page<Presentation> pres, Pageable five) {
+        return pres.stream().map(this::toDto).collect(Collectors.toList());
+    }
 }

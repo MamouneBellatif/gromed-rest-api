@@ -3,6 +3,7 @@ package fr.miage.gromed.repositories;
 import fr.miage.gromed.model.medicament.Presentation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PresentationRepository extends JpaRepository<Presentation, Long> {
+    @Query("select p from Presentation p where   CAST( p.codeCIP AS string ) like concat('%', ?1, '%') or   CAST( p.codeCIP AS string ) like concat('%', ?2, '%')  or  CAST( p.codeCIP AS string ) like concat('%', ?3, '%') or  CAST( p.codeCIP AS string ) like concat('%', ?4, '%') or  CAST( p.codeCIP AS string ) like concat('%', ?5, '%') ")
+    Page<Presentation> findByCodeCIPIn(String codeCIP, String codeCIP2, String codeCIP3, String codeCIP4, String codeCIP5,
+                                       Pageable pageable);
 
 //    @Query("""
 //            select p from Presentation p
@@ -33,4 +37,7 @@ public interface PresentationRepository extends JpaRepository<Presentation, Long
     Optional<Presentation> findByCodeCIP(Long cip);
 //    @Query("SELECT m FROM Medicament m WHERE m.codeCIS LIKE %:id%")
 //    Page<Presentation> findByCodeCIPContaining(@Param("id") Integer id);
+
+//    getFiveRandomPresentations();
+
 }

@@ -13,6 +13,7 @@ import fr.miage.gromed.service.auth.UserContextHolder;
 import fr.miage.gromed.service.mapper.CommandeTypeMapper;
 import fr.miage.gromed.service.mapper.PanierItemMapper;
 import fr.miage.gromed.service.mapper.PanierMapper;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,8 @@ public class PanierService implements PanierServiceInterface {
         checkExpiredPanier(panier);
         return panierMapper.toDto(panier);
     }
+
+
 
     @Transactional(rollbackFor = Exception.class)
     public boolean delete(Long idPanier) {
@@ -185,7 +188,7 @@ public class PanierService implements PanierServiceInterface {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    private PanierDto resolvePanier(Panier panier, AlerteStockDecisionDto alerteStockDecisionDto){
+    public PanierDto resolvePanier(Panier panier, AlerteStockDecisionDto alerteStockDecisionDto){
             if (alerteStockDecisionDto.isAccept()) {
                 panier.getItems().forEach(panierItem -> {
                     var missing = panierItem.getQuantite() - panierItem.getPresentation().getStock().getQuantiteStockPhysique();
@@ -279,7 +282,7 @@ public class PanierService implements PanierServiceInterface {
     public boolean isUserAllowedToBuy(PanierItem panierItem, Utilisateur utilisateur)
     {
         // Vérifier agrément du medicmaent et et etablissement de l'utilisateur (si Hopital)
-        return true;
+        return panierItem.getPresentation().getPrixDeBase() +panierItem.getPresentation().getPrixDeBase() > 0 ;
     }
     public List<Panier> getPanierByUser() {
         return panierRepository.findByClient(UserContextHolder.getUtilisateur());
@@ -292,6 +295,7 @@ public class PanierService implements PanierServiceInterface {
     @Transactional(rollbackFor = Exception.class)
     public PanierDto addToPanier(Long idPanier, PanierItemDto panierItemDto) {
 //        utilisateurService.setBuying
+
         Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
         if (checkExpiredPanier(panier)) {
             throw new ExpiredPanierException();
@@ -302,6 +306,9 @@ public class PanierService implements PanierServiceInterface {
 
         PanierItem panierItem = panierItemRepository.findByPanierAndPresentation(panier,presentation)
                                 .orElse(PanierItem.builder()
+                                        .delivree(0)
+                                        .conflict(false)
+
                                                   .presentation(presentation)
                                                   .panier(panier)
                                                   .build());
@@ -312,7 +319,7 @@ public class PanierService implements PanierServiceInterface {
         if (!isDoublon) {
             panier.addItem(panierItem);
         }
-        if (panierItem.getQuantite() < 0 ) {
+        if (panierItem.getQuantite() <= 0 ) {
             panierItemRepository.delete(panierItem);
         }
         panierRepository.save(panier);
@@ -424,13 +431,24 @@ public class PanierService implements PanierServiceInterface {
     @Transactional(rollbackFor = Exception.class)
     public PanierDto getCurrentPanierDto() {
         Utilisateur utilisateur = UserContextHolder.getUtilisateur();
-        Panier panier = panierRepository.findByClientAndExpiresAtAfter(utilisateur, LocalDateTime.now()).orElseThrow(() -> {
-           throw new AucunPanierActifException();
-        });
-        if(checkExpiredPanier(panier)) {
+        Panier panier;
+        try {
+
+            panier = panierRepository.findByClientAndExpiresAtAfter(utilisateur, LocalDateTime.now()).orElseThrow(() -> {
+                throw new AucunPanierActifException();
+            });
+        } catch (IncorrectResultSizeDataAccessException e) {
+            List<Panier> paniers = panierRepository.findAllByExpiresAtAfterAndExpiredFalseOrderByDateCreationDesc(LocalDateTime.now());
+            if (paniers.isEmpty()) {
+                throw new AucunPanierActifException();
+            }
+            panier = paniers.get(0);
+        }
+
+        if (checkExpiredPanier(panier)) {
             throw new ExpiredPanierException();
         }
-    return panierMapper.toDto(panier);
+        return panierMapper.toDto(panier);
     }
 
     public List<PanierDto> getHistorique() {

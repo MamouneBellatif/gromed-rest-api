@@ -48,6 +48,7 @@ public class ComptabiliteInterneService {
       public Facture createFacture(Panier panier) {
           var prixTTC = getPrixTotal(panier);
           this.cashTransaction(CHIFFRE_AFFAIRE,prixTTC);
+
           return this.generateFacture(panier);
 //          Map<String, Integer> produitQuantite = panierItems.stream().collect(
 //                  Collectors.toMap(

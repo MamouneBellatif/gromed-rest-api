@@ -1,8 +1,7 @@
-package fr.miage.gromed.model.controller;
+package fr.miage.gromed.controller;
 
 
-import fr.miage.gromed.dto.UtilisateurDto;
-import fr.miage.gromed.model.controller.customResponse.ResponseHandler;
+import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.exceptions.IncompleteUtilisateurException;
 import fr.miage.gromed.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;

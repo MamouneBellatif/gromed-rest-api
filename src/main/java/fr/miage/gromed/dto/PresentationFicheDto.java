@@ -18,6 +18,7 @@ public class PresentationFicheDto extends PresentationDto implements Serializabl
     private final double stock;
     private final String statutAdmin;
 
+
 //    private final String avis;
 //    private final String typeGenerique;
 //    private List<String> composantSubtances;

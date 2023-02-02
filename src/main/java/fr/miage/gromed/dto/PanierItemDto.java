@@ -13,6 +13,9 @@ import lombok.*;
 @NoArgsConstructor
 public class PanierItemDto implements Serializable{
     private int quantite;
+
+    private String presentationDenomination;
+    private double prix;
     private Long presentationCip;
     private boolean delayed;
 

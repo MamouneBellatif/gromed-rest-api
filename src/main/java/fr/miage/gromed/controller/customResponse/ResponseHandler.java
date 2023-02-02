@@ -1,4 +1,4 @@
-package fr.miage.gromed.model.controller.customResponse;
+package fr.miage.gromed.controller.customResponse;
 
 import fr.miage.gromed.dto.PanierItemDto;
 import fr.miage.gromed.model.Utilisateur;

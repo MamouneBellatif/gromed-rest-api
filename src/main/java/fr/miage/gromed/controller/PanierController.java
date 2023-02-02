@@ -1,13 +1,12 @@
-package fr.miage.gromed.model.controller;
+package fr.miage.gromed.controller;
 
 
-import fr.miage.gromed.model.controller.customResponse.ResponseHandler;
+import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.*;
 import fr.miage.gromed.exceptions.*;
 
 import fr.miage.gromed.service.UtilisateurService;
 import fr.miage.gromed.service.auth.PanierContextHolder;
-import fr.miage.gromed.service.auth.PanierContextWrapper;
 import jakarta.persistence.OptimisticLockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import fr.miage.gromed.service.metier.PanierService;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static java.lang.Thread.currentThread;
 
@@ -44,7 +39,7 @@ public class PanierController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Object> getCurrentPanier(@RequestParam String idUser){
+    public ResponseEntity<Object> getCurrentPanier(){
             return ResponseHandler.generateResponse("panier en cours", HttpStatus.OK,  panierService.getCurrentPanierDto());
     }
 

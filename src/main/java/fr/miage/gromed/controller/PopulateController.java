@@ -1,4 +1,4 @@
-package fr.miage.gromed.model.controller;
+package fr.miage.gromed.controller;
 
 import fr.miage.gromed.service.metier.PopulateService;
 import org.springframework.beans.factory.annotation.Autowired;

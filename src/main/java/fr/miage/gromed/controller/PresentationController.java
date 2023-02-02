@@ -1,10 +1,11 @@
-package fr.miage.gromed.model.controller;
+package fr.miage.gromed.controller;
 
 import com.google.firebase.auth.FirebaseAuthException;
-import fr.miage.gromed.model.controller.customResponse.ResponseHandler;
+import fr.miage.gromed.controller.customResponse.ResponseHandler;
 import fr.miage.gromed.dto.PresentationDto;
 import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.repositories.PresentationRepository;
+import fr.miage.gromed.service.mapper.PresentationFicheMapper;
 import fr.miage.gromed.service.metier.PresentationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,18 @@ public class PresentationController {
                                   PresentationRepository presentationRepository) {
         this.presentationService = presentationService;
     }
+
+
+    @GetMapping(value = "/random",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getRandomPresentation() {
+        var presentationDto = presentationService.getRandomPresentation();
+        return ResponseHandler.generateResponse("Suggestion", HttpStatus.OK, presentationDto);
+    }
+
+    @Autowired
+
+    public PresentationFicheMapper presentationFicheMapper;
 
 
 
