@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Builder
@@ -18,8 +19,7 @@ public class Facture implements Serializable {
     private Double montant;
     private LocalDateTime date;
     private String nomClient;
-    private Map<String, Integer> produitsAchetes;
-    private Map<String, Double> prixProduits;
+    private List<ItemFacture> produitsAchetes;
 
 
 }

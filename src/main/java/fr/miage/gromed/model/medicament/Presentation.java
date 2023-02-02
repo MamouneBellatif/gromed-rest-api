@@ -63,15 +63,6 @@ public class Presentation {
     @ManyToOne(cascade = CascadeType.ALL)
     private Medicament medicament;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Presentation that = (Presentation) o;
-
-        return id.equals(that.id);
-    }
 
 
 //    public <R> R getMedicament() {

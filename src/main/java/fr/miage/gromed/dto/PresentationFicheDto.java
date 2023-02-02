@@ -16,6 +16,7 @@ import java.util.List;
 @Setter
 public class PresentationFicheDto extends PresentationDto implements Serializable {
     private final double stock;
+    private final String statutAdmin;
 
 //    private final String avis;
 //    private final String typeGenerique;

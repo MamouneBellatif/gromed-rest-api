@@ -38,4 +38,6 @@ public interface PanierRepository extends JpaRepository<Panier, Long> {
 
     boolean existsByClientAndExpiresAtAfterAndPaidFalse(Utilisateur utilisateur, LocalDateTime time);
 
+
+
 }

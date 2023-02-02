@@ -12,31 +12,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-//@Service
+import java.util.logging.Logger;
+
+@Service
 public class StockListener {
 
-//    @Autowired
-//    private StockRepository stockRepository;
-//
-//    @PostPersist
-//    @Transactional
-//    public void postPersist(Stock stock) {
-//        if (stock.getQuantiteStockLogique() < Stock.SEUIL) {
-//            stock.setRestockAlertFlag(true);
-//            stockRepository.save(stock);
-//        }
-//    }
-//
-//    @PrePersist
-//    @Transactional
-//    public void prePersist(Stock stock) {
-//        if (stock.getQuantiteStockPhysique() < 0) {
-//            throw new RuntimeException("Le stock ne peut pas être négatif");
-//        }
-//    }
-//
+    @Autowired
+    private StockRepository stockRepository;
+
+    @PostPersist
+    @Transactional
+    public void postPersist(Stock stock) {
+        if (stock.getQuantiteStockLogique() < Stock.SEUIL) {
+            stock.setRestockAlertFlag(true);
+            stockRepository.save(stock);
+        }
+    }
+
+    Logger logger = Logger.getLogger(StockListener.class.getName());
+
+    @PrePersist
+    @Transactional
+    public void prePersist(Stock stock) {
+       logger.info("StockListener.prePersist");
+    }
+
+    //TODO:un cancel survient sur un stock hors stock on ajoute a la commande prioritaire
+
 //    private final ApplicationEventPublisher publisher;
-//
+
 //    @Autowired
 //    public StockListener(ApplicationEventPublisher publisher) {
 //        this.publisher = publisher;

@@ -1,9 +1,11 @@
 package fr.miage.gromed.service;
 
 import com.google.firebase.auth.UserRecord;
+import fr.miage.gromed.dto.PanierItemDto;
 import fr.miage.gromed.model.Utilisateur;
 import fr.miage.gromed.model.enums.PerimetreUtilisateur;
 import fr.miage.gromed.repositories.UtilisateurRepository;
+import fr.miage.gromed.service.auth.PanierContextHolder;
 import fr.miage.gromed.service.auth.UserContextHolder;
 import fr.miage.gromed.service.mapper.UtilisateurMapper;
 import fr.miage.gromed.service.metier.PanierService;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Service
@@ -33,8 +36,8 @@ public class UtilisateurService {
         Utilisateur user = utilisateurRepository.findById(userRecord.getUid()).orElse(registerUtilisateur(userRecord));
         if (user.isAwaitingResponse() && !route.contains("resolve")) {
             user.setAwaitingResponse(false);
-//            panierService.getCurrentPanierDto()
         }
+
         return user;
     }
 

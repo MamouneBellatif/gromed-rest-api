@@ -6,7 +6,6 @@ import fr.miage.gromed.service.metier.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +18,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController("/api/stock")
-@CrossOrigin(origins = "*")
 public class ServerSideEventController {
 
     private final Map<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();

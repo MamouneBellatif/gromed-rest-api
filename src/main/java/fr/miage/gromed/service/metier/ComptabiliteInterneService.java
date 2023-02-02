@@ -1,6 +1,7 @@
 package fr.miage.gromed.service.metier;
 
 import fr.miage.gromed.dto.Facture;
+import fr.miage.gromed.dto.ItemFacture;
 import fr.miage.gromed.dto.PanierItemDto;
 import fr.miage.gromed.exceptions.PresentationNotFoundException;
 import fr.miage.gromed.model.ComptabiliteInterne;
@@ -45,24 +46,45 @@ public class ComptabiliteInterneService {
       @Transactional(rollbackFor = Exception.class)
       @Lock(LockModeType.PESSIMISTIC_WRITE)
       public Facture createFacture(Panier panier) {
-          Set<PanierItem> panierItems = panier.getItems();
-          final var tva = 0.2;
-          var prixTotal = panierItems.stream().mapToDouble(item -> (item.getPresentation().getPrixDeBase()+item.getPresentation().getHonoraireRemboursement())* item.getQuantite()).sum();
-          var prixTTC = prixTotal + prixTotal*tva;
+          var prixTTC = getPrixTotal(panier);
           this.cashTransaction(CHIFFRE_AFFAIRE,prixTTC);
-          Map<String, Integer> produitQuantite = panierItems.stream().collect(
-                  Collectors.toMap(
-                          panierItem -> panierItem.getPresentation().getLibelle() + ": " + panierItem.getPresentation().getMedicament().getDenomination(),
-                          PanierItem::getQuantite
-                  )
-          );
-          Map<String, Double> coutProduit = panierItems.stream().collect(
-                  Collectors.toMap(
-                          panierItem -> panierItem.getPresentation().getLibelle() + ": " + panierItem.getPresentation().getMedicament().getDenomination(),
-                          panierItem -> panierItem.getPresentation().getPrixDeBase()+panierItem.getPresentation().getHonoraireRemboursement()
-                  )
-          );
-        return Facture.builder().idPanier(panier.getId()).nomClient(panier.getClient().getNom()).montant(prixTTC).produitsAchetes(produitQuantite).prixProduits(coutProduit).date(LocalDateTime.now()).build();
+          return this.generateFacture(panier);
+//          Map<String, Integer> produitQuantite = panierItems.stream().collect(
+//                  Collectors.toMap(
+//                          panierItem -> panierItem.getPresentation().getLibelle() + ": " + panierItem.getPresentation().getMedicament().getDenomination(),
+//                          PanierItem::getQuantite
+//                  )
+//          );
+//          Map<String, Double> coutProduit = panierItems.stream().collect(
+//                  Collectors.toMap(
+//                          panierItem -> panierItem.getPresentation().getLibelle() + ": " + panierItem.getPresentation().getMedicament().getDenomination(),
+//                          panierItem -> panierItem.getPresentation().getPrixDeBase()+panierItem.getPresentation().getHonoraireRemboursement()
+//                  )
+//          );
+
+//          Map<Object,Object> produitQuantite = panierItems.stream().collect(
+//                  Collectors.toMap(
+//                          panierItem -> panierItem.getPresentation().getLibelle() + ": " + panierItem.getPresentation().getMedicament().getDenomination(),
+//                          panierItem -> Map.of(panierItem.getQuantite(),panierItem.getPresentation().getPrixDeBase()+panierItem.getPresentation().getHonoraireRemboursement())
+//                  )
+//          );
+//        return Facture.builder().idPanier(panier.getId()).nomClient(panier.getClient().getNom()).montant(prixTTC).produitsAchetes(produitQuantite).date(LocalDateTime.now()).build();
+    }
+
+    public Facture generateFacture(Panier panier) {
+        var prixTTC = getPrixTotal(panier);
+        Set<PanierItem> panierItems = panier.getItems();
+        List<ItemFacture> itemsFacture = panierItems.stream().map(item -> {
+            return ItemFacture.builder().libelle(item.getPresentation().getLibelle()+ ": " + item.getPresentation().getMedicament().getDenomination()).quantite(item.getQuantite()).prixUnitaire(item.getPresentation().getPrixDeBase()+item.getPresentation().getHonoraireRemboursement()).build();
+        }).collect(Collectors.toList());
+        return Facture.builder().idPanier(panier.getId()).nomClient(panier.getClient().getNom()).montant(prixTTC).produitsAchetes(itemsFacture).date(LocalDateTime.now()).build();
+    }
+
+    private double getPrixTotal(Panier panier) {
+        Set<PanierItem> panierItems = panier.getItems();
+        final var tva = 0.2;
+        var prixTotal = panierItems.stream().mapToDouble(item -> (item.getPresentation().getPrixDeBase()+item.getPresentation().getHonoraireRemboursement())* item.getQuantite()).sum();
+        return  prixTotal + prixTotal*tva;
     }
 
     @Transactional

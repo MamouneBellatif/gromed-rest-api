@@ -17,6 +17,7 @@ public class FirebBaseAuthConfig {
             FilterRegistrationBean<AuthFilter> registrationBean = new FilterRegistrationBean<>();
 //            registrationBean.setFilter(new AuthFilter());
             registrationBean.setFilter(authFilter);
+            registrationBean.setOrder(1);
             registrationBean.addUrlPatterns("/api/*");
             return registrationBean;
         }

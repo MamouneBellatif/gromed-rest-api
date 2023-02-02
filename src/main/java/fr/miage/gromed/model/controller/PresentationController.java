@@ -15,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path="/api/presentation/",produces = MediaType.APPLICATION_JSON_VALUE)
 public class PresentationController {

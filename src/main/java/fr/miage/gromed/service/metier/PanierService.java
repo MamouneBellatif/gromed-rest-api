@@ -27,16 +27,16 @@ import java.util.stream.Collectors;
 public class PanierService implements PanierServiceInterface {
 
     private final PanierRepository panierRepository;
-
+    private final PresentationRepository presentationRepository;
     private final StockService stockService;
 
     private final PanierMapper panierMapper;
 
     private final PanierItemMapper panierItemMapper;
     private final PanierItemRepository panierItemRepository;
-
+    final private UtilisateurRepository utilisateurRepository;
     @Autowired
-    public PanierService(PanierItemMapper panierItemMapper, PanierRepository panierRepository, StockService stockService, PanierMapper panierMapper, PanierItemRepository panierItemRepository, PresentationRepository presentationRepository, ComptabiliteInterneService comptabiliteInterneService, CommandeTypeRepository commandeTypeRepository, CommandeTypeMapper commandeTypeMapper) {
+    public PanierService(PanierItemMapper panierItemMapper, PanierRepository panierRepository, StockService stockService, PanierMapper panierMapper, PanierItemRepository panierItemRepository, PresentationRepository presentationRepository, ComptabiliteInterneService comptabiliteInterneService, CommandeTypeRepository commandeTypeRepository, CommandeTypeMapper commandeTypeMapper, UtilisateurRepository utilisateurRepository) {
         this.panierRepository = panierRepository;
         this.stockService = stockService;
         this.panierMapper = panierMapper;
@@ -46,6 +46,7 @@ public class PanierService implements PanierServiceInterface {
         this.comptabiliteInterneService = comptabiliteInterneService;
         this.commandeTypeRepository = commandeTypeRepository;
         this.commandeTypeMapper = commandeTypeMapper;
+        this.utilisateurRepository = utilisateurRepository;
     }
 
 
@@ -69,14 +70,15 @@ public class PanierService implements PanierServiceInterface {
         return true;
     }
 
-    //TODO: Confirmer et payer le panier
+    //TODO:payer le panier
 
 
-    private PanierItemDto sanitizeItemsInput(PanierItemDto panierItemDto) {
+    @Transactional(rollbackFor = Exception.class)
+    public PanierItemDto sanitizeItemsInput(PanierItemDto panierItemDto) {
         if (panierItemDto.getQuantite() < 0) {
             throw new NegativeQuantityException();
         }
-        panierItemDto.setQuantite(panierItemDto.getQuantite() > 0 ? panierItemDto.getQuantite() : 1);
+//        panierItemDto.setQuantite(panierItemDto.getQuantite() > 0 ? panierItemDto.getQuantite() : 1);
         return panierItemDto;
     }
 
@@ -84,8 +86,7 @@ public class PanierService implements PanierServiceInterface {
         return panierRepository.existsByClientAndExpiresAtAfterAndPaidFalse(utilisateur, LocalDateTime.now());
     }
 
-    @Autowired
-    UtilisateurRepository utilisateurRepository;
+
 
     @Transactional(rollbackFor = Exception.class)
     public PanierDto createPanier(PanierItemDto itemDtoSet) {
@@ -129,9 +130,8 @@ public class PanierService implements PanierServiceInterface {
     public PanierDto resolveItem(AlerteStockDecisionDto alerteStockDecisionDto) {
         PanierItem panierItem = panierItemMapper.toEntity(alerteStockDecisionDto.getPanierItemDto());
         Panier panier = panierItem.getPanier();
-        var isUpdating = false;
         if (panier != null) {
-            isUpdating = panierItemRepository.existsByPanierAndPresentation_Id(panier, panierItem.getPresentation().getId());
+            var isUpdating = panierItemRepository.existsByPanierAndPresentation_Id(panier, panierItem.getPresentation().getId());
             if (checkExpiredPanier(panier)) {
                 throw new ExpiredPanierException();
             }
@@ -183,6 +183,8 @@ public class PanierService implements PanierServiceInterface {
 
         return null;
     }
+
+    @Transactional(rollbackFor = Exception.class)
     private PanierDto resolvePanier(Panier panier, AlerteStockDecisionDto alerteStockDecisionDto){
             if (alerteStockDecisionDto.isAccept()) {
                 panier.getItems().forEach(panierItem -> {
@@ -203,8 +205,9 @@ public class PanierService implements PanierServiceInterface {
 
         Utilisateur utilisateur = UserContextHolder.getUtilisateur();
         Panier panier = panierRepository.findById(alerteStockDecisionDto.getPanierId()).orElseThrow(PanierNotFoundException::new);
-        if(panier.getClient().equals(utilisateur)){
-            throw new UserNotAllowedToBuyException();
+//        getCurrentPanier();
+        if(!panier.getClient().getId().equals(utilisateur.getId())){
+            throw new WrongUserException();
         }
         if (!utilisateur.isAwaitingResponse()){
             throw new NoConflictToResolveException();
@@ -282,8 +285,7 @@ public class PanierService implements PanierServiceInterface {
         return panierRepository.findByClient(UserContextHolder.getUtilisateur());
     }
 
-    final
-    PresentationRepository presentationRepository;
+
 
 
 
