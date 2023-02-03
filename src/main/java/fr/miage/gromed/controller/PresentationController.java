@@ -51,12 +51,18 @@ public class PresentationController {
         return ResponseEntity.ok(presentationPage);
     }
 
-    @GetMapping(value = "/fiche/{idPresentation}",
+    @GetMapping(value = "/fiche/{cip}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getPresentation(@PathVariable Long idPresentation) {
-            var presentationFicheDto = presentationService.getPresentationFiche(idPresentation);
+    public ResponseEntity<Object> getPresentation(@PathVariable String cip) {
+            var presentationFicheDto = presentationService.getPresentationFiche(Long.parseLong(cip));
             return ResponseHandler.generateResponse("Presentation de la fiche", HttpStatus.OK,presentationFicheDto);
+    }
 
+    @GetMapping(value = "/fiche/similar/{cip}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getSimilarPresentation(@PathVariable String cip) {
+            var presentationFicheDto = presentationService.getSimilarPresentation(Long.parseLong(cip));
+            return ResponseHandler.generateResponse("Presentation de la fiche", HttpStatus.OK,presentationFicheDto);
     }
 
     @ExceptionHandler(PresentationNotFoundException.class)

@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static fr.miage.gromed.model.enums.ComptabiliteParametres.CHIFFRE_AFFAIRE;
+import static fr.miage.gromed.model.enums.ComptabiliteParametres.TRESORERIE;
 
 @Service
 public class ComptabiliteInterneService {
@@ -118,4 +119,11 @@ public class ComptabiliteInterneService {
     }
 
 
-}
+    @Transactional(rollbackFor = Exception.class)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+            public void reimburse(PanierItem panierItem)
+            {
+                double prixTTC = panierItem.getPresentation().getPrixDeBase()+panierItem.getPresentation().getHonoraireRemboursement();
+                this.cashTransaction(TRESORERIE,-prixTTC);
+            }
+    }

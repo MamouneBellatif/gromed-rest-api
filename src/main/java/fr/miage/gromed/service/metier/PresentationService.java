@@ -15,9 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.springframework.data.util.Optionals.toStream;
 
@@ -49,22 +51,38 @@ public class PresentationService {
 //        return presentationFicheMapper.toDto(presentationDto.get());
     }
 
-    public Page<PresentationDto> searchPresentation(String string, Pageable pageable){
-            var searchResult = presentationRepository.searchQuery(string,0.1, pageable);
-            return presentationMapper.toPageableDto(searchResult, pageable);
+    public Page<PresentationDto> searchPresentation(String string, Pageable pageable) {
+        var searchResult = presentationRepository.searchQuery(string, 0.1, pageable);
+        return presentationMapper.toPageableDto(searchResult, pageable);
     }
 
     @Autowired
     PresentationMapper presentationeMapper;
 
+    final static int NB_SUGESTION = 5;
+
     @Transactional(readOnly = true)
     public List<PresentationDto> getRandomPresentation() {
-        Random random = new Random();
-        int randomInt = random.nextInt(100);
-        List<String> ints = Arrays.stream(random.ints(randomInt, 100, 45024).distinct().limit(5).toArray()).mapToObj(String::valueOf).toList();
-        Pageable five = PageRequest.of(0, 5);
-        Page<Presentation> pres = presentationRepository.findByCodeCIPIn(ints.get(1), ints.get(1), ints.get(2), ints.get(3), ints.get(4), five) ;
-        return presentationeMapper.toListDto(pres, five);
+        long qty = presentationRepository.countAll();
+        Random r =new Random();
+        List<PresentationDto>  list = new ArrayList<>();
+        for ( int i = 0  ;i < NB_SUGESTION ; i++) {
+            presentationRepository.findById(r.nextLong(0, qty)).ifPresent(t -> list.add(presentationeMapper.toDto(t)));
+        }
+        return list;
 
+    }
+
+    @Transactional(readOnly = true)
+    public List<PresentationDto> getSimilarPresentation(long CIP) {
+        List<PresentationDto>  list = new ArrayList<>();
+        presentationRepository.findByCodeCIP(CIP).ifPresent(presentation -> {
+            presentation.getMedicament().getPresentationList().forEach(presentationBiq -> {
+                    if (presentationBiq.getCodeCIP() != CIP) {
+                        list.add(presentationeMapper.toDto(presentationBiq));
+                    }
+        });
+    });
+        return list;
     }
 }

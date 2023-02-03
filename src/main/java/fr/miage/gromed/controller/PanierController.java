@@ -86,7 +86,6 @@ public class PanierController {
 
     @PutMapping("/resolve")
     public ResponseEntity<Object> resolvePanier(@RequestBody AlerteStockDecisionDto decisionDto){
-        //TODO: verifier si le panier est nouveau ou pas
             PanierDto panierDto = panierService.resolve(decisionDto);
             return ResponseHandler.generateResponse("résolu", HttpStatus.GONE, panierDto);
     }
@@ -97,7 +96,6 @@ public class PanierController {
     }
 
 
-    @SuppressWarnings("ReassignedVariable")
     @ExceptionHandler(OptimisticLockException.class)
     public ResponseEntity<Object> handleOptimisticLockException(OptimisticLockException e) throws InterruptedException {
         if (PanierContextHolder.getPanierItemDto() != null)  return ResponseHandler.generateFailureResponse("Erreur de concurrence, veuillez réessayer", HttpStatus.CONFLICT);

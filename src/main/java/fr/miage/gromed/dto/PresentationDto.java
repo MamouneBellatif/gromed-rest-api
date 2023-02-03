@@ -19,7 +19,7 @@ public class PresentationDto implements Serializable {
     private final String imageUrl;
     private final double prixDeBase;
     private final double honoraireRemboursement;
-//    private final String statutAdmin;
-//    private final StockDto stock;
+    private final String statutAdmin;
+    private final int stock;
     private final String tauxRemboursement;
 }
