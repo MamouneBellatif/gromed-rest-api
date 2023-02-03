@@ -8,13 +8,11 @@ import fr.miage.gromed.exceptions.*;
 import fr.miage.gromed.model.*;
 import fr.miage.gromed.model.medicament.Presentation;
 import fr.miage.gromed.repositories.*;
-import fr.miage.gromed.scheduler.restockfaker.PanierCleanExpired;
 import fr.miage.gromed.service.auth.UserContextHolder;
 import fr.miage.gromed.service.mapper.CommandeTypeMapper;
 import fr.miage.gromed.service.mapper.PanierItemMapper;
 import fr.miage.gromed.service.mapper.PanierMapper;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,9 +54,16 @@ public class PanierService implements PanierServiceInterface {
         Panier panier = panierRepository.findById(idPanier).orElseThrow(PanierNotFoundException::new);
         checkUser(panier);
         checkExpiredPanier(panier);
+        checkPaidPanier(panier);
         return panierMapper.toDto(panier);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void checkPaidPanier(Panier panier) {
+        if (panier.isPaid()) {
+            throw new PanierAlreadyPaidException();
+        }
+    }
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -97,6 +102,7 @@ public class PanierService implements PanierServiceInterface {
         if (hasActivePanier(utilisateur)) {
             return this.addToPanier(getCurrentPanier().getId(), itemDtoSet);
         }
+
         Panier panier = Panier.builder()
                         .dateCreation(LocalDateTime.now())
                         .paid(false)
@@ -123,6 +129,7 @@ public class PanierService implements PanierServiceInterface {
         Panier persistedPanier = panierRepository.save(panier);
         return panierMapper.toDto(persistedPanier);
     }
+
 
     private boolean checkCommercialisation(PanierItem panierItem) {
         return !panierItem.getPresentation().getEtatCommercialisation().toLowerCase().contains("arrêt");
@@ -223,12 +230,7 @@ public class PanierService implements PanierServiceInterface {
         }
         return resolvePanier(panier,alerteStockDecisionDto);
     }
-
-    //TODO:Mettre a jour un panier
-
-    //TODO: payer un panier
-
-
+    @Transactional
     public boolean checkExpiredPanier(Panier panier) {
         LocalDateTime now = LocalDateTime.now();
         if (panier.getExpiresAt().isBefore(now) && !panier.isExpired()) {
@@ -243,44 +245,16 @@ public class PanierService implements PanierServiceInterface {
 
     }
 
-//    @Bean
-//    public ThreadPoolTaskScheduler getScheduler(){
-//        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-//        scheduler.setPoolSize(10);
-//        return scheduler;
-//    }
-
-//    @Autowired
-//    ThreadPoolTaskScheduler scheduler;
-
-//    private void initPanierExpiration(Panier panier) {
-//        ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
-//        ex..(() -> serviceCallB, 10, TimeUnit.SECONDS);
-//       ScheduledFuture<?> scheduledExpiration = scheduledExecutorService.scheduleWithFixedDelay(this.expirePanier(panier), 30, 30,TimeUnit.MINUTES);
-//       scheduledExpiration.cancel(true);
-////        taskScheduler.schedule(() -> this.expirePanier(panier)
-////                                ,new SimpleTrigger(Date.from(panier.getExpiresAt().atZone(ZoneId.systemDefault()).toInstant())));
-//    }
-
-
-//    private Runnable expirePanier(Panier panier) {
-//        return new Runnable(){
-//            @Override
-//            public void run() {
-//                if (!panier.isPaid()) {
-//                    stockService.resetStockLogique(panier);
-//                    panier.setExpired(true);
-//                    panierRepository.save(panier);
-//                }
-//            }
-//        };
-//        }
-
         //TODO: verifier conditions de ventes (presentation active + agrément)
 //TODO: recherche sur composant
     //TODO: connrecter strioe
     public boolean isUserAllowedToBuy(PanierItem panierItem, Utilisateur utilisateur)
     {
+        Utilisateur user = UserContextHolder.getUtilisateur();
+//        if (user.getRole().toUpperCase().contains("HOPITAL")) || user.getEtablissement().getCategorie().toUpperCase().contains(("HOPTIAL")) && !panierItem.getPresentation().getIsAgrement()){
+//            return false;
+//        }
+//    }
         // Vérifier agrément du medicmaent et et etablissement de l'utilisateur (si Hopital)
         return panierItem.getPresentation().getPrixDeBase() +panierItem.getPresentation().getPrixDeBase() > 0 ;
     }
@@ -335,6 +309,8 @@ public class PanierService implements PanierServiceInterface {
             if (!canCancel(panier)) {
               throw new PanierCantBeCanceledException();
             }
+//            comptabiliteInterneService.reimburse(panier);
+
             stockService.resetStockLogique(panier);
             panier.setCanceled(true);
             panierRepository.save(panier);
@@ -433,10 +409,12 @@ public class PanierService implements PanierServiceInterface {
         Utilisateur utilisateur = UserContextHolder.getUtilisateur();
         Panier panier;
         try {
-
             panier = panierRepository.findByClientAndExpiresAtAfter(utilisateur, LocalDateTime.now()).orElseThrow(() -> {
                 throw new AucunPanierActifException();
             });
+            if (panier.isPaid()) {
+                throw new PanierAlreadyPaidException();
+            }
         } catch (IncorrectResultSizeDataAccessException e) {
             List<Panier> paniers = panierRepository.findAllByExpiresAtAfterAndExpiredFalseOrderByDateCreationDesc(LocalDateTime.now());
             if (paniers.isEmpty()) {

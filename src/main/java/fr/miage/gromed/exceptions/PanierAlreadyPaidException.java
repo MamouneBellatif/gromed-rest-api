@@ -1,4 +1,4 @@
-package fr.miage.gromed.service.metier;
+package fr.miage.gromed.exceptions;
 
 import fr.miage.gromed.exceptions.CustomException;
 import org.springframework.http.HttpStatus;

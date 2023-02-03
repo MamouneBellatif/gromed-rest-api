@@ -16,6 +16,9 @@ public interface PresentationRepository extends JpaRepository<Presentation, Long
     Page<Presentation> findByCodeCIPIn(String codeCIP, String codeCIP2, String codeCIP3, String codeCIP4, String codeCIP5,
                                        Pageable pageable);
 
+    @Query("select count(distinct p) from Presentation p where p.id = ?1")
+    long countPresentation(Long id);
+
 //    @Query("""
 //            select p from Presentation p
 //            where upper(p.libelle) like upper(concat('%', ?1, '%')) or upper(p.medicament.denomination) like upper(concat('%', ?2, '%')) and upper(p.prixDeBase) is not null and upper(p.prixDeBase) > ?3""")
@@ -30,11 +33,16 @@ public interface PresentationRepository extends JpaRepository<Presentation, Long
 
     Page<Presentation> findByCodeCIP(Long cip, Pageable pageable);
 
+    Optional<Presentation> findByCodeCIP(Long cip);
+    @Query("select count(p) from Presentation p")
+    long countAll();
+
 //    @Query("select p from Presentation p where p.codeCIP = :codeCIP or p.medicament.codeCIS = :codeCIS")
 //    List<Presentation> findByCodeCIPOrMedicament_CodeCIS(@Param("codeCIP") Long codeCIP, @Param("codeCIS") int codeCIS, Pageable pageable);
 //
 
-    Optional<Presentation> findByCodeCIP(Long cip);
+
+
 //    @Query("SELECT m FROM Medicament m WHERE m.codeCIS LIKE %:id%")
 //    Page<Presentation> findByCodeCIPContaining(@Param("id") Integer id);
 
