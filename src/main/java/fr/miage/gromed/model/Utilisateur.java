@@ -22,7 +22,7 @@ public class Utilisateur {
     @Column
     private String nom;
 
-    @Column( unique = true)
+    @Column(unique = true)
     private String email;
 
     @Column
@@ -40,7 +40,7 @@ public class Utilisateur {
     private boolean awaitingResponse;
 
     @Column
-    private boolean isBuying;
+    private boolean buying;
 
     @ElementCollection
     private List<String> notifications;

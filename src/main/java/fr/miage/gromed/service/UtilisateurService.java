@@ -40,13 +40,12 @@ public class UtilisateurService {
 
         return user;
     }
-
     private Utilisateur registerUtilisateur(UserRecord userFB){
         return  utilisateurRepository.save(Utilisateur.builder()
                 .id(userFB.getUid())
                 .nom(userFB.getDisplayName())
                 .email(userFB.getEmail())
-                .isBuying(false)
+                .buying(false)
                 .awaitingResponse(false)
                 .perimetre(PerimetreUtilisateur.FRONT_OFFICE)
                 .build());
